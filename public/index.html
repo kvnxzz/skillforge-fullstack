@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkillForge Live | Student Portal</title>
+    <title>SkillForge Live | Unified Portal Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -42,72 +42,50 @@
                 </span>
             </div>
             <h2 id="portal-title" class="text-3xl font-extrabold mb-2 text-center tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-500 bg-clip-text text-transparent">SkillForge Live</h2>
-            <p class="text-xs text-gray-400 text-center mb-6">Student Access Terminal</p>
+            <p class="text-xs text-gray-400 text-center mb-6">Multi-Role Access Terminal</p>
 
             <div id="error-msg" class="text-red-400 text-xs hidden mb-4 p-2.5 bg-red-500/10 border border-red-500/20 rounded-lg"></div>
 
-            <input type="text" id="auth-token" value="STUDENT123" placeholder="Enter Token (e.g. STUDENT123)" onkeypress="if(event.key === 'Enter') login()" class="w-full bg-black/80 border border-gray-800 rounded-xl px-4 py-3 mb-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-all">
+            <input type="text" id="auth-token" value="STUDENT123" placeholder="Enter Token (e.g. STUDENT123, ADMIN123, UNIV123)" onkeypress="if(event.key === 'Enter') login()" class="w-full bg-black/80 border border-gray-800 rounded-xl px-4 py-3 mb-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-all">
             <button onclick="login()" class="w-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-black font-bold py-3 rounded-xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(0,255,136,0.3)]">Authenticate Access &rarr;</button>
         </div>
     </div>
 
-    <!-- Dashboard Screen -->
-    <div id="dashboard-screen" class="hidden min-h-screen p-4 md:p-8 space-y-6">
+    <!-- Student Dashboard Screen -->
+    <div id="dashboard-screen-student" class="hidden min-h-screen p-4 md:p-8 space-y-6">
         <div class="max-w-7xl mx-auto space-y-6">
-            
-            <!-- Header -->
             <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400 text-xl" id="user-initial">S</div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400 text-xl user-initial">S</div>
                     <div>
                         <span class="text-[10px] font-mono tracking-widest text-emerald-400 uppercase">Student Operational Node</span>
-                        <h1 id="user-greeting" class="text-2xl font-black text-white tracking-tight">Welcome</h1>
+                        <h1 class="text-2xl font-black text-white tracking-tight user-greeting">Welcome</h1>
                     </div>
                 </div>
-
-                <!-- Navigation -->
                 <div class="flex items-center gap-2 bg-black/50 p-1.5 rounded-xl border border-gray-800">
                     <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="px-4 py-2 text-xs font-bold rounded-lg transition bg-emerald-500 text-black">Dashboard</button>
                     <button onclick="switchTab('jobs')" id="tab-btn-jobs" class="px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white">Jobs & Roles</button>
                     <button onclick="switchTab('applications')" id="tab-btn-applications" class="px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white">Applications (<span id="app-count-badge">0</span>)</button>
                 </div>
-
                 <div class="flex items-center gap-3">
-                    <span id="socket-status" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs bg-black/60 border border-emerald-500/30 text-emerald-400 font-mono">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> SOCKET CONNECTED
-                    </span>
                     <button onclick="logout()" class="text-xs bg-gray-900 hover:bg-gray-800 text-red-400 px-3 py-2 rounded-xl border border-gray-800 transition">Logout</button>
                 </div>
             </header>
 
-            <!-- Server Broadcast Banner -->
-            <div id="broadcast-alert" class="hidden glass-card border-emerald-500/50 p-4 rounded-xl text-emerald-300 text-sm font-mono flex items-center justify-between animate-pulse">
-                <span id="broadcast-msg-text">Broadcast message will appear here</span>
-                <button onclick="document.getElementById('broadcast-alert').classList.add('hidden')" class="text-xs text-gray-400 hover:text-white">&times;</button>
-            </div>
-
-            <!-- Dashboard View -->
             <div id="view-dashboard" class="space-y-6">
-                <!-- Skills Management -->
                 <div class="glass-card p-6 rounded-2xl">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                         <div>
                             <h3 class="text-sm font-bold text-white uppercase tracking-wider">Your Active Skills</h3>
                             <p class="text-xs text-gray-400">Add or remove skills to update dynamic compatibility with available jobs.</p>
                         </div>
-                        
                         <div class="flex gap-2">
                             <input type="text" id="new-skill-input" placeholder="e.g. Web Development, Python" onkeypress="if(event.key === 'Enter') addSkill()" class="bg-black/60 border border-gray-800 text-xs rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500 min-w-[200px]">
                             <button onclick="addSkill()" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 text-xs px-4 py-2 rounded-xl font-bold transition">+ Add Skill</button>
                         </div>
                     </div>
-
-                    <div id="student-skills" class="flex flex-wrap gap-2 min-h-[40px] items-center p-3 bg-black/40 rounded-xl border border-gray-900">
-                        <span class="text-xs text-gray-500 italic">Loading active skill vectors...</span>
-                    </div>
+                    <div id="student-skills" class="flex flex-wrap gap-2 min-h-[40px] items-center p-3 bg-black/40 rounded-xl border border-gray-900"></div>
                 </div>
-
-                <!-- Metrics & Summary Feed -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="glass-card p-6 rounded-2xl space-y-4">
                         <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">Match Telemetry</h3>
@@ -120,53 +98,93 @@
                             <p class="text-[11px] text-gray-400 mt-1">Total Active Roles</p>
                         </div>
                     </div>
-
                     <div class="glass-card p-6 rounded-2xl md:col-span-2">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-sm font-bold text-white uppercase tracking-wider">Top Job Opportunities</h3>
                             <button onclick="switchTab('jobs')" class="text-xs text-emerald-400 hover:underline font-mono">View All &rarr;</button>
                         </div>
-                        <div id="top-job-list" class="space-y-3">
-                            <p class="text-xs text-gray-500 italic">Fetching positions from backend...</p>
-                        </div>
+                        <div id="top-job-list" class="space-y-3"></div>
                     </div>
                 </div>
             </div>
-
-            <!-- Jobs View -->
             <div id="view-jobs" class="hidden space-y-6">
                 <div class="glass-card p-6 rounded-2xl space-y-4">
                     <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
-                        <div class="w-full md:w-1/2 relative">
-                            <input type="text" id="search-input" onkeyup="filterJobs()" placeholder="Search by title, company, or required skill..." class="w-full bg-black/80 border border-gray-800 text-xs rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
-                        </div>
-                        <div class="flex items-center gap-2 w-full md:w-auto">
-                            <select id="sort-select" onchange="filterJobs()" class="bg-black/80 border border-gray-800 text-xs rounded-xl px-3 py-3 text-gray-300 focus:outline-none">
-                                <option value="match">Sort by Highest Match Score</option>
-                                <option value="title">Sort by Job Title</option>
-                            </select>
-                        </div>
+                        <input type="text" id="search-input" onkeyup="filterJobs()" placeholder="Search by title, company, or required skill..." class="w-full md:w-1/2 bg-black/80 border border-gray-800 text-xs rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
+                        <select id="sort-select" onchange="filterJobs()" class="bg-black/80 border border-gray-800 text-xs rounded-xl px-3 py-3 text-gray-300 focus:outline-none">
+                            <option value="match">Sort by Highest Match Score</option>
+                            <option value="title">Sort by Job Title</option>
+                        </select>
                     </div>
                 </div>
-
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">All Live Postings</h3>
-                    <div id="all-job-list" class="space-y-3">
-                        <p class="text-xs text-gray-500 italic">Querying database...</p>
-                    </div>
+                    <div id="all-job-list" class="space-y-3"></div>
                 </div>
             </div>
-
-            <!-- Applications View -->
             <div id="view-applications" class="hidden space-y-6">
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Submitted Applications</h3>
-                    <div id="applications-list" class="space-y-3">
-                        <p class="text-xs text-gray-500 italic">No applications submitted yet.</p>
-                    </div>
+                    <div id="applications-list" class="space-y-3"></div>
                 </div>
             </div>
+        </div>
+    </div>
 
+    <!-- Admin Terminal Screen -->
+    <div id="dashboard-screen-admin" class="hidden min-h-screen p-4 md:p-8 space-y-6">
+        <div class="max-w-7xl mx-auto space-y-6">
+            <header class="flex items-center justify-between glass-card p-6 rounded-2xl">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/40 flex items-center justify-center font-bold text-purple-400 text-xl user-initial">A</div>
+                    <div>
+                        <span class="text-[10px] font-mono tracking-widest text-purple-400 uppercase">Administrator Control Center</span>
+                        <h1 class="text-2xl font-black text-white tracking-tight user-greeting">Admin Console</h1>
+                    </div>
+                </div>
+                <button onclick="logout()" class="text-xs bg-gray-900 hover:bg-gray-800 text-red-400 px-3 py-2 rounded-xl border border-gray-800 transition">Logout</button>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Post Job Form -->
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Post New Job Role</h3>
+                    <input type="text" id="admin-job-title" placeholder="Job Title" class="w-full bg-black/80 border border-gray-800 text-xs rounded-xl p-3 text-white">
+                    <input type="text" id="admin-job-company" placeholder="Company Name" class="w-full bg-black/80 border border-gray-800 text-xs rounded-xl p-3 text-white">
+                    <input type="text" id="admin-job-skills" placeholder="Required Skills (comma-separated)" class="w-full bg-black/80 border border-gray-800 text-xs rounded-xl p-3 text-white">
+                    <button onclick="postAdminJob()" class="w-full bg-purple-600 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-purple-500 transition">Post Opportunity</button>
+                </div>
+
+                <!-- Broadcast Announcement -->
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Global Socket Broadcast</h3>
+                    <textarea id="admin-broadcast-msg" rows="4" placeholder="Enter broadcast message for all connected users..." class="w-full bg-black/80 border border-gray-800 text-xs rounded-xl p-3 text-white"></textarea>
+                    <button onclick="sendBroadcast()" class="w-full bg-cyan-600 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-cyan-500 transition">Transmit Broadcast</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- University Terminal Screen -->
+    <div id="dashboard-screen-university" class="hidden min-h-screen p-4 md:p-8 space-y-6">
+        <div class="max-w-7xl mx-auto space-y-6">
+            <header class="flex items-center justify-between glass-card p-6 rounded-2xl">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center font-bold text-cyan-400 text-xl user-initial">U</div>
+                    <div>
+                        <span class="text-[10px] font-mono tracking-widest text-cyan-400 uppercase">University Oversight Node</span>
+                        <h1 class="text-2xl font-black text-white tracking-tight user-greeting">University Dashboard</h1>
+                    </div>
+                </div>
+                <button onclick="logout()" class="text-xs bg-gray-900 hover:bg-gray-800 text-red-400 px-3 py-2 rounded-xl border border-gray-800 transition">Logout</button>
+            </header>
+
+            <div class="glass-card p-6 rounded-2xl space-y-4">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Campus Application & Placement Analytics</h3>
+                <div id="univ-applications-list" class="space-y-3">
+                    <p class="text-xs text-gray-500 italic">Loading student applications across all programs...</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -178,7 +196,6 @@
         let activeJobs = [];
         let submittedApplications = [];
 
-        // Auth
         async function login() {
             const token = document.getElementById('auth-token').value.trim();
             const errBox = document.getElementById('error-msg');
@@ -198,24 +215,31 @@
                 });
 
                 const data = await res.json();
-                if (data.success && data.role === 'student') {
-                    currentUser = data.data; // Synced with server User object
-                    if (!currentUser.needs) currentUser.needs = [];
-
+                if (data.success) {
+                    currentUser = data.data;
                     document.getElementById('login-screen').classList.add('hidden');
-                    document.getElementById('dashboard-screen').classList.remove('hidden');
-                    document.getElementById('user-greeting').innerText = `Welcome, ${currentUser.name}`;
-                    document.getElementById('user-initial').innerText = currentUser.name ? currentUser.name.charAt(0) : 'S';
 
-                    // Notify server socket of login
+                    // Update User Info across nodes
+                    document.querySelectorAll('.user-greeting').forEach(el => el.innerText = `Welcome, ${currentUser.name}`);
+                    document.querySelectorAll('.user-initial').forEach(el => el.innerText = currentUser.name ? currentUser.name.charAt(0) : 'U');
+
                     socket.emit('user_login', { name: currentUser.name, role: currentUser.role });
 
-                    renderSkills();
-                    fetchJobs();
-                    fetchApplications();
-                    fetchSettings();
+                    // Role-Based Screen Router
+                    if (currentUser.role === 'student') {
+                        if (!currentUser.needs) currentUser.needs = [];
+                        document.getElementById('dashboard-screen-student').classList.remove('hidden');
+                        renderSkills();
+                        fetchJobs();
+                        fetchApplications();
+                    } else if (currentUser.role === 'admin') {
+                        document.getElementById('dashboard-screen-admin').classList.remove('hidden');
+                    } else if (currentUser.role === 'university') {
+                        document.getElementById('dashboard-screen-university').classList.remove('hidden');
+                        fetchUniversityApplications();
+                    }
                 } else {
-                    errBox.innerText = data.message || 'Invalid Student Token.';
+                    errBox.innerText = data.message || 'Invalid Authentication Token.';
                     errBox.classList.remove('hidden');
                 }
             } catch (err) {
@@ -226,30 +250,88 @@
 
         function logout() {
             currentUser = null;
-            document.getElementById('dashboard-screen').classList.add('hidden');
+            document.getElementById('dashboard-screen-student').classList.add('hidden');
+            document.getElementById('dashboard-screen-admin').classList.add('hidden');
+            document.getElementById('dashboard-screen-university').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
         }
 
+        // Admin Operational Functions
+        async function postAdminJob() {
+            const title = document.getElementById('admin-job-title').value.trim();
+            const company = document.getElementById('admin-job-company').value.trim();
+            const skillRequired = document.getElementById('admin-job-skills').value.trim();
+
+            if (!title || !company || !skillRequired) return alert('Fill all fields.');
+
+            const res = await fetch('/api/jobs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, company, skillRequired })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('Job posted successfully!');
+                document.getElementById('admin-job-title').value = '';
+                document.getElementById('admin-job-company').value = '';
+                document.getElementById('admin-job-skills').value = '';
+            }
+        }
+
+        function sendBroadcast() {
+            const msg = document.getElementById('admin-broadcast-msg').value.trim();
+            if (msg) {
+                socket.emit('admin_broadcast', msg);
+                document.getElementById('admin-broadcast-msg').value = '';
+                alert('Broadcast sent across all live client nodes.');
+            }
+        }
+
+        // University Operational Functions
+        async function fetchUniversityApplications() {
+            try {
+                const res = await fetch('/api/applications/all');
+                const data = await res.json();
+                const container = document.getElementById('univ-applications-list');
+
+                if (data.success && data.applications.length > 0) {
+                    container.innerHTML = data.applications.map(app => `
+                        <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-white text-sm">${app.studentName} &rarr; ${app.jobId?.title || 'Position'}</h4>
+                                <p class="text-xs text-gray-400">${app.studentEmail} &bull; ${app.jobId?.company || 'Company'}</p>
+                            </div>
+                            <span class="text-xs font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full">
+                                Match: ${app.matchScore}%
+                            </span>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-gray-500 italic">No applications found.</p>`;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Student-focused Shared Logic
         function switchTab(tab) {
             ['dashboard', 'jobs', 'applications'].forEach(t => {
                 document.getElementById(`view-${t}`).classList.add('hidden');
                 const btn = document.getElementById(`tab-btn-${t}`);
                 if (btn) btn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white';
             });
-
             document.getElementById(`view-${tab}`).classList.remove('hidden');
             const activeBtn = document.getElementById(`tab-btn-${tab}`);
             if (activeBtn) activeBtn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition bg-emerald-500 text-black';
         }
 
-        // Skills Persisted to Backend
         function renderSkills() {
             const container = document.getElementById('student-skills');
             if (!currentUser || !currentUser.needs || currentUser.needs.length === 0) {
                 container.innerHTML = `<span class="text-xs text-gray-500 italic">No skills registered. Add skills to compute matches.</span>`;
                 return;
             }
-
             container.innerHTML = currentUser.needs.map((skill, index) => `
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-mono">
                     ${skill}
@@ -292,12 +374,10 @@
             }
         }
 
-        // Calculate Skills Match Score
         function calculateMatchScore(studentSkills, requiredSkillString) {
             if (!studentSkills || !studentSkills.length || !requiredSkillString) return 0;
             const studentSet = new Set(studentSkills.map(s => s.toLowerCase().trim()));
             const requiredSkills = requiredSkillString.split(',').map(s => s.toLowerCase().trim());
-            
             let matches = 0;
             requiredSkills.forEach(skill => {
                 if (studentSet.has(skill)) matches++;
@@ -305,7 +385,6 @@
             return Math.round((matches / requiredSkills.length) * 100);
         }
 
-        // Fetch & Sync Jobs
         async function fetchJobs() {
             try {
                 const res = await fetch('/api/jobs');
@@ -321,7 +400,6 @@
 
         function computeMatches() {
             const userSkills = currentUser ? currentUser.needs : [];
-
             activeJobs = activeJobs.map(job => {
                 const score = calculateMatchScore(userSkills, job.skillRequired);
                 return { ...job, matchScore: score };
@@ -331,8 +409,10 @@
                 ? Math.round(activeJobs.reduce((acc, j) => acc + j.matchScore, 0) / activeJobs.length) 
                 : 0;
 
-            document.getElementById('match-rate').innerText = `${avgMatch}%`;
-            document.getElementById('opportunity-count').innerText = activeJobs.length;
+            const rateEl = document.getElementById('match-rate');
+            const oppEl = document.getElementById('opportunity-count');
+            if (rateEl) rateEl.innerText = `${avgMatch}%`;
+            if (oppEl) oppEl.innerText = activeJobs.length;
 
             renderDashboardJobs();
             filterJobs();
@@ -340,13 +420,12 @@
 
         function renderDashboardJobs() {
             const listEl = document.getElementById('top-job-list');
+            if (!listEl) return;
             const topJobs = [...activeJobs].sort((a, b) => b.matchScore - a.matchScore).slice(0, 3);
-
             if (topJobs.length === 0) {
                 listEl.innerHTML = `<p class="text-xs text-gray-500 italic">No job opportunities in database.</p>`;
                 return;
             }
-
             listEl.innerHTML = topJobs.map(job => renderJobCard(job)).join('');
         }
 
@@ -354,6 +433,7 @@
             const query = (document.getElementById('search-input')?.value || '').toLowerCase();
             const sortBy = document.getElementById('sort-select')?.value || 'match';
             const listEl = document.getElementById('all-job-list');
+            if (!listEl) return;
 
             let filtered = activeJobs.filter(job => {
                 const titleMatch = (job.title || '').toLowerCase().includes(query);
@@ -406,7 +486,6 @@
             `;
         }
 
-        // Applications
         async function applyJob(jobId) {
             try {
                 const res = await fetch('/api/applications', {
@@ -448,8 +527,10 @@
         }
 
         function updateApplicationsUI() {
-            document.getElementById('app-count-badge').innerText = submittedApplications.length;
+            const badge = document.getElementById('app-count-badge');
+            if (badge) badge.innerText = submittedApplications.length;
             const container = document.getElementById('applications-list');
+            if (!container) return;
 
             if (submittedApplications.length === 0) {
                 container.innerHTML = `<p class="text-xs text-gray-500 italic">No applications submitted yet.</p>`;
@@ -472,24 +553,6 @@
             }).join('');
         }
 
-        // Global Settings
-        async function fetchSettings() {
-            try {
-                const res = await fetch('/api/settings');
-                const data = await res.json();
-                if (data.success && data.settings) {
-                    document.getElementById('portal-title').innerText = data.settings.portalName;
-                }
-            } catch (err) {}
-        }
-
-        // Real-Time Socket Event Listeners
-        socket.on('server_broadcast', (msg) => {
-            const alertBox = document.getElementById('broadcast-alert');
-            document.getElementById('broadcast-msg-text').innerText = `📢 BROADCAST: ${msg}`;
-            alertBox.classList.remove('hidden');
-        });
-
         socket.on('new_job_posted', (newJob) => {
             activeJobs.unshift(newJob);
             computeMatches();
@@ -498,12 +561,6 @@
         socket.on('job_deleted', (deletedId) => {
             activeJobs = activeJobs.filter(j => j._id !== deletedId);
             computeMatches();
-        });
-
-        socket.on('settings_updated', (settings) => {
-            if (settings.portalName) {
-                document.getElementById('portal-title').innerText = settings.portalName;
-            }
         });
     </script>
 </body>
