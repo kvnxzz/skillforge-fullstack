@@ -107,6 +107,7 @@
                     </div>
                 </div>
             </div>
+
             <div id="view-jobs" class="hidden space-y-6">
                 <div class="glass-card p-6 rounded-2xl space-y-4">
                     <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
@@ -122,6 +123,7 @@
                     <div id="all-job-list" class="space-y-3"></div>
                 </div>
             </div>
+
             <div id="view-applications" class="hidden space-y-6">
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Submitted Applications</h3>
@@ -219,13 +221,11 @@
                     currentUser = data.data;
                     document.getElementById('login-screen').classList.add('hidden');
 
-                    // Update User Info across nodes
                     document.querySelectorAll('.user-greeting').forEach(el => el.innerText = `Welcome, ${currentUser.name}`);
                     document.querySelectorAll('.user-initial').forEach(el => el.innerText = currentUser.name ? currentUser.name.charAt(0) : 'U');
 
                     socket.emit('user_login', { name: currentUser.name, role: currentUser.role });
 
-                    // Role-Based Screen Router
                     if (currentUser.role === 'student') {
                         if (!currentUser.needs) currentUser.needs = [];
                         document.getElementById('dashboard-screen-student').classList.remove('hidden');
@@ -256,7 +256,6 @@
             document.getElementById('login-screen').classList.remove('hidden');
         }
 
-        // Admin Operational Functions
         async function postAdminJob() {
             const title = document.getElementById('admin-job-title').value.trim();
             const company = document.getElementById('admin-job-company').value.trim();
@@ -264,17 +263,21 @@
 
             if (!title || !company || !skillRequired) return alert('Fill all fields.');
 
-            const res = await fetch('/api/jobs', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, company, skillRequired })
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert('Job posted successfully!');
-                document.getElementById('admin-job-title').value = '';
-                document.getElementById('admin-job-company').value = '';
-                document.getElementById('admin-job-skills').value = '';
+            try {
+                const res = await fetch('/api/jobs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, company, skillRequired })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Job posted successfully!');
+                    document.getElementById('admin-job-title').value = '';
+                    document.getElementById('admin-job-company').value = '';
+                    document.getElementById('admin-job-skills').value = '';
+                }
+            } catch (err) {
+                alert('Failed to post job.');
             }
         }
 
@@ -287,7 +290,6 @@
             }
         }
 
-        // University Operational Functions
         async function fetchUniversityApplications() {
             try {
                 const res = await fetch('/api/applications/all');
@@ -302,7 +304,7 @@
                                 <p class="text-xs text-gray-400">${app.studentEmail} &bull; ${app.jobId?.company || 'Company'}</p>
                             </div>
                             <span class="text-xs font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full">
-                                Match: ${app.matchScore}%
+                                Match: ${app.matchScore || 0}%
                             </span>
                         </div>
                     `).join('');
@@ -314,14 +316,15 @@
             }
         }
 
-        // Student-focused Shared Logic
         function switchTab(tab) {
             ['dashboard', 'jobs', 'applications'].forEach(t => {
-                document.getElementById(`view-${t}`).classList.add('hidden');
+                const view = document.getElementById(`view-${t}`);
+                if (view) view.classList.add('hidden');
                 const btn = document.getElementById(`tab-btn-${t}`);
                 if (btn) btn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white';
             });
-            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            const activeView = document.getElementById(`view-${tab}`);
+            if (activeView) activeView.classList.remove('hidden');
             const activeBtn = document.getElementById(`tab-btn-${tab}`);
             if (activeBtn) activeBtn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition bg-emerald-500 text-black';
         }
@@ -543,10 +546,10 @@
                     <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex justify-between items-center">
                         <div>
                             <h4 class="font-bold text-white text-sm">${job.title || 'Position'}</h4>
-                            <p class="text-xs text-gray-400">${job.company || 'Company'} &bull; Status: <span class="text-emerald-400 font-semibold">${app.status}</span></p>
+                            <p class="text-xs text-gray-400">${job.company || 'Company'} &bull; Status: <span class="text-emerald-400 font-semibold">${app.status || 'Submitted'}</span></p>
                         </div>
                         <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full">
-                            Match Score: ${app.matchScore}%
+                            Match Score: ${app.matchScore || 0}%
                         </span>
                     </div>
                 `;
@@ -561,6 +564,10 @@
         socket.on('job_deleted', (deletedId) => {
             activeJobs = activeJobs.filter(j => j._id !== deletedId);
             computeMatches();
+        });
+
+        socket.on('broadcast', (msg) => {
+            alert(`[System Broadcast]: ${msg}`);
         });
     </script>
 </body>
