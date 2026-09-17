@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkillForge Live | Gen-Z Cyber Engine</title>
+    <title>SkillForge Live | Student Operating System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -33,9 +33,8 @@
 </head>
 <body class="antialiased font-sans selection:bg-emerald-500 selection:text-black">
 
-    <!-- Login Screen -->
+    <!-- Auth View -->
     <div id="login-screen" class="min-h-screen flex items-center justify-center relative overflow-hidden">
-        <!-- Cyber AI Background Overlay -->
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1600&auto=format&fit=crop" 
                  alt="Cyberpunk AI Background" 
@@ -46,15 +45,15 @@
         <div class="glass-card p-8 rounded-2xl w-96 relative z-10 shadow-2xl transition-all">
             <div class="flex justify-center mb-4">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> SYSTEM LIVE v2.0
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> SYSTEM LIVE v2.5
                 </span>
             </div>
             <h2 id="portal-title" class="text-3xl font-extrabold mb-2 text-center tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-500 bg-clip-text text-transparent">SkillForge</h2>
-            <p class="text-xs text-gray-400 text-center mb-6">Autonomous Skill Matching & Live Network</p>
+            <p class="text-xs text-gray-400 text-center mb-6">Autonomous Skill Matching & Student Operating System</p>
 
             <div id="error-msg" class="text-red-400 text-xs hidden mb-4 p-2.5 bg-red-500/10 border border-red-500/20 rounded-lg"></div>
 
-            <input type="text" id="auth-token" placeholder="Enter Security Token (STUDENT123)" onkeypress="if(event.key === 'Enter') login()" class="w-full bg-black/80 border border-gray-800 rounded-xl px-4 py-3 mb-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-all">
+            <input type="text" id="auth-token" placeholder="Enter Security Token (e.g. STUDENT123)" onkeypress="if(event.key === 'Enter') login()" class="w-full bg-black/80 border border-gray-800 rounded-xl px-4 py-3 mb-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-all">
             <button onclick="login()" class="w-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-black font-bold py-3 rounded-xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(0,255,136,0.3)]">Authenticate Access &rarr;</button>
 
             <div class="pt-6 mt-6 border-t border-gray-800/80 text-center space-y-2">
@@ -64,11 +63,11 @@
         </div>
     </div>
 
-    <!-- Dashboard Screen -->
-    <div id="dashboard-screen" class="hidden min-h-screen p-6 md:p-12">
-        <div class="max-w-5xl mx-auto space-y-8">
+    <!-- Main Dashboard View -->
+    <div id="dashboard-screen" class="hidden min-h-screen p-4 md:p-8 space-y-6">
+        <div class="max-w-7xl mx-auto space-y-6">
             
-            <!-- Header -->
+            <!-- Header & Navigation -->
             <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl">
                 <div class="flex items-center gap-4">
                     <img id="user-avatar" 
@@ -80,26 +79,21 @@
                         <h1 id="user-greeting" class="text-2xl font-black text-white tracking-tight">Welcome</h1>
                     </div>
                 </div>
+
+                <!-- Navigation Tabs -->
+                <div class="flex items-center gap-2 bg-black/50 p-1.5 rounded-xl border border-gray-800">
+                    <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="px-4 py-2 text-xs font-bold rounded-lg transition bg-emerald-500 text-black">Dashboard</button>
+                    <button onclick="switchTab('jobs')" id="tab-btn-jobs" class="px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white">Jobs & Roles</button>
+                    <button onclick="switchTab('applications')" id="tab-btn-applications" class="px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white">Applications (<span id="app-count-badge">0</span>)</button>
+                </div>
+
                 <div class="flex items-center gap-3">
-                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs bg-black/60 border border-emerald-500/30 text-emerald-400 font-mono">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> ACTIVE SESSION
+                    <span id="socket-status" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs bg-black/60 border border-emerald-500/30 text-emerald-400 font-mono">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> LIVE NODE
                     </span>
-                    <a href="/university.html" class="text-xs bg-gray-800 hover:bg-gray-700 px-4 py-2 text-emerald-400 font-medium rounded-xl border border-gray-700 transition">University Mode</a>
+                    <button onclick="logout()" class="text-xs bg-gray-900 hover:bg-gray-800 text-red-400 px-3 py-2 rounded-xl border border-gray-800 transition">Logout</button>
                 </div>
             </header>
-
-            <!-- Gen-Z Banner Visual -->
-            <div class="relative overflow-hidden rounded-2xl border border-emerald-500/30 h-36 flex items-center p-6">
-                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&auto=format&fit=crop" 
-                     alt="Cyber AI Visual" 
-                     class="absolute inset-0 w-full h-full object-cover opacity-40">
-                <div class="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
-                <div class="relative z-10 max-w-lg">
-                    <span class="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">Autonomous Match Engine</span>
-                    <h3 class="text-lg font-extrabold text-white">AI-Powered Skill Matchmaking</h3>
-                    <p class="text-xs text-gray-300">Boost your verification vectors to unlock higher-tier technical roles automatically.</p>
-                </div>
-            </div>
 
             <!-- Real-Time System Broadcast Alert -->
             <div id="broadcast-alert" class="hidden glass-card border-emerald-500/50 p-4 rounded-xl text-emerald-300 text-sm font-mono flex items-center justify-between animate-bounce">
@@ -107,45 +101,97 @@
                 <button onclick="document.getElementById('broadcast-alert').classList.add('hidden')" class="text-xs text-gray-400 hover:text-white">&times;</button>
             </div>
 
-            <!-- Interactive Skills Manager -->
-            <div class="glass-card p-6 rounded-2xl">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                    <div>
-                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Verified Skill Vector</h3>
-                        <p class="text-xs text-gray-400">Dynamic tags used by the matchmaking engine</p>
-                    </div>
-                    
-                    <div class="flex gap-2">
-                        <input type="text" id="new-skill-input" placeholder="e.g. React.js, Python" onkeypress="if(event.key === 'Enter') addSkill()" class="bg-black/60 border border-gray-800 text-xs rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
-                        <button onclick="addSkill()" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-2 rounded-xl font-bold transition">+ Add Skill</button>
+            <!-- View 1: Main Dashboard -->
+            <div id="view-dashboard" class="space-y-6">
+                <!-- Banner Visual -->
+                <div class="relative overflow-hidden rounded-2xl border border-emerald-500/30 h-36 flex items-center p-6">
+                    <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&auto=format&fit=crop" 
+                         alt="Cyber AI Visual" 
+                         class="absolute inset-0 w-full h-full object-cover opacity-40">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
+                    <div class="relative z-10 max-w-lg">
+                        <span class="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">Skill Vector Engine</span>
+                        <h3 class="text-lg font-extrabold text-white">Dynamic Match & Discovery</h3>
+                        <p class="text-xs text-gray-300">Keep your verified skills updated to get higher-accuracy placement recommendations.</p>
                     </div>
                 </div>
 
-                <div id="student-skills" class="flex flex-wrap gap-2 min-h-[40px] items-center">
-                    <span class="text-xs text-gray-500 italic">Authenticating node specs...</span>
+                <!-- Skills Management Hub -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Your Active Skill Vectors</h3>
+                            <p class="text-xs text-gray-400">Add or remove technical competencies to update match algorithms instantly.</p>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <input type="text" id="new-skill-input" placeholder="e.g. React.js, Python, AWS" onkeypress="if(event.key === 'Enter') addSkill()" class="bg-black/60 border border-gray-800 text-xs rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500 min-w-[200px]">
+                            <button onclick="addSkill()" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 text-xs px-4 py-2 rounded-xl font-bold transition">+ Add Skill</button>
+                        </div>
+                    </div>
+
+                    <div id="student-skills" class="flex flex-wrap gap-2 min-h-[40px] items-center p-3 bg-black/40 rounded-xl border border-gray-900">
+                        <span class="text-xs text-gray-500 italic">Loading active skill nodes...</span>
+                    </div>
+                </div>
+
+                <!-- Metrics & Summary Feed -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card p-6 rounded-2xl space-y-4">
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">Match Telemetry</h3>
+                        <div class="p-4 bg-black/50 rounded-xl border border-gray-800/80">
+                            <span class="text-3xl font-black text-emerald-400 glow-text" id="match-rate">--</span>
+                            <p class="text-[11px] text-gray-400 mt-1">Average Compatibility Index</p>
+                        </div>
+                        <div class="p-4 bg-black/50 rounded-xl border border-gray-800/80">
+                            <span class="text-2xl font-bold text-cyan-400" id="opportunity-count">0</span>
+                            <p class="text-[11px] text-gray-400 mt-1">Active Compatible Opportunities</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl md:col-span-2">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Top Recommended Positions</h3>
+                            <button onclick="switchTab('jobs')" class="text-xs text-emerald-400 hover:underline font-mono">View All &rarr;</button>
+                        </div>
+                        <div id="top-job-list" class="space-y-3">
+                            <p class="text-xs text-gray-500 italic">Computing positions...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Main Section: Opportunity Feed -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Stats Card -->
-                <div class="glass-card p-6 rounded-2xl md:col-span-1 space-y-4">
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">Match Telemetry</h3>
-                    <div class="p-4 bg-black/50 rounded-xl border border-gray-800/80">
-                        <span class="text-3xl font-black text-emerald-400 glow-text" id="match-rate">--</span>
-                        <p class="text-[11px] text-gray-400 mt-1">Average Profile Match Score</p>
-                    </div>
-                    <div class="p-4 bg-black/50 rounded-xl border border-gray-800/80">
-                        <span class="text-2xl font-bold text-cyan-400" id="opportunity-count">0</span>
-                        <p class="text-[11px] text-gray-400 mt-1">Live Compatible Roles</p>
+            <!-- View 2: Search & Job Explorer -->
+            <div id="view-jobs" class="hidden space-y-6">
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
+                        <div class="w-full md:w-1/2 relative">
+                            <input type="text" id="search-input" onkeyup="filterJobs()" placeholder="Search by title, company, or required skill (e.g., Python)..." class="w-full bg-black/80 border border-gray-800 text-xs rounded-xl px-4 py-3 pl-10 text-white focus:outline-none focus:border-emerald-500">
+                            <svg class="w-4 h-4 text-gray-500 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <div class="flex items-center gap-2 w-full md:w-auto">
+                            <select id="sort-select" onchange="filterJobs()" class="bg-black/80 border border-gray-800 text-xs rounded-xl px-3 py-3 text-gray-300 focus:outline-none">
+                                <option value="match">Sort by Highest Match</option>
+                                <option value="title">Sort by Job Title</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Job Listings -->
-                <div class="glass-card p-6 rounded-2xl md:col-span-2">
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Autonomous Job Matches</h3>
-                    <div id="job-list" class="space-y-3">
-                        <p class="text-xs text-gray-500 italic">Computing matches...</p>
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">All Live Roles</h3>
+                    <div id="all-job-list" class="space-y-3">
+                        <p class="text-xs text-gray-500 italic">Searching database...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View 3: Applications Tracker -->
+            <div id="view-applications" class="hidden space-y-6">
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Dispatched Applications</h3>
+                    <div id="applications-list" class="space-y-3">
+                        <p class="text-xs text-gray-500 italic">No applications submitted yet.</p>
                     </div>
                 </div>
             </div>
@@ -153,12 +199,15 @@
         </div>
     </div>
 
+    <!-- Client-Side Script Engine -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
         let currentUser = null;
         let activeJobs = [];
+        let submittedApplications = [];
 
+        // Auth Handler
         async function login() {
             const token = document.getElementById('auth-token').value.trim();
             const errBox = document.getElementById('error-msg');
@@ -180,7 +229,8 @@
                 const data = await res.json();
                 if (data.success && data.role === 'student') {
                     currentUser = data.user;
-                    
+                    if (!currentUser.skills) currentUser.skills = [];
+
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('dashboard-screen').classList.remove('hidden');
                     document.getElementById('user-greeting').innerText = `Welcome, ${currentUser.name}`;
@@ -190,26 +240,46 @@
                     renderSkills();
                     fetchJobs();
                 } else {
-                    errBox.innerText = data.message || 'Authentication failed. Valid token required.';
+                    errBox.innerText = data.message || 'Authentication failed. Use a valid student token.';
                     errBox.classList.remove('hidden');
                 }
             } catch (err) {
-                errBox.innerText = 'Server unreachable. Verify backend connections.';
+                errBox.innerText = 'Server connection failed. Please ensure backend is running.';
                 errBox.classList.remove('hidden');
             }
         }
 
+        function logout() {
+            currentUser = null;
+            document.getElementById('dashboard-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+        }
+
+        // View Navigation
+        function switchTab(tab) {
+            ['dashboard', 'jobs', 'applications'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`tab-btn-${t}`);
+                btn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white';
+            });
+
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tab}`);
+            activeBtn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition bg-emerald-500 text-black';
+        }
+
+        // Skill Vector Controls
         function renderSkills() {
             const container = document.getElementById('student-skills');
             if (!currentUser || !currentUser.skills || currentUser.skills.length === 0) {
-                container.innerHTML = `<span class="text-xs text-gray-500 italic">No skills added yet.</span>`;
+                container.innerHTML = `<span class="text-xs text-gray-500 italic">No skill tags registered. Add skills to compute matches.</span>`;
                 return;
             }
 
             container.innerHTML = currentUser.skills.map((skill, index) => `
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-mono">
                     ${skill}
-                    <button onclick="removeSkill(${index})" class="text-gray-500 hover:text-red-400 transition">&times;</button>
+                    <button onclick="removeSkill(${index})" class="text-gray-500 hover:text-red-400 transition font-bold">&times;</button>
                 </span>
             `).join('');
         }
@@ -218,7 +288,8 @@
             const input = document.getElementById('new-skill-input');
             const newSkill = input.value.trim();
             if (newSkill && currentUser) {
-                if (!currentUser.skills.includes(newSkill)) {
+                const exists = currentUser.skills.some(s => s.toLowerCase() === newSkill.toLowerCase());
+                if (!exists) {
                     currentUser.skills.push(newSkill);
                     renderSkills();
                     computeMatches();
@@ -235,6 +306,7 @@
             }
         }
 
+        // Job Feed & Search Processing
         async function fetchJobs() {
             try {
                 const res = await fetch('/api/jobs');
@@ -244,42 +316,80 @@
                     computeMatches();
                 }
             } catch (err) {
-                console.error('Error fetching opportunity matches:', err);
+                console.error('Error fetching jobs:', err);
             }
         }
 
         function computeMatches() {
-            const jobListEl = document.getElementById('job-list');
             const userSkills = currentUser ? currentUser.skills.map(s => s.toLowerCase()) : [];
 
-            if (activeJobs.length === 0) {
-                jobListEl.innerHTML = `<p class="text-xs text-gray-500 italic">No active job opportunities found.</p>`;
-                document.getElementById('opportunity-count').innerText = '0';
-                document.getElementById('match-rate').innerText = '0%';
-                return;
-            }
+            activeJobs = activeJobs.map(job => {
+                const required = job.skills || [];
+                if (required.length === 0) return { ...job, matchScore: 100 };
 
-            let totalScore = 0;
-            const mappedJobs = activeJobs.map(job => {
-                const requiredSkills = job.skills || [];
-                if (requiredSkills.length === 0) return { ...job, matchScore: 100 };
-
-                const matches = requiredSkills.filter(s => userSkills.includes(s.toLowerCase())).length;
-                const score = Math.round((matches / requiredSkills.length) * 100);
-                totalScore += score;
+                const matches = required.filter(s => userSkills.includes(s.toLowerCase())).length;
+                const score = Math.round((matches / required.length) * 100);
                 return { ...job, matchScore: score };
             });
 
-            const avgMatch = Math.round(totalScore / activeJobs.length);
+            const avgMatch = activeJobs.length 
+                ? Math.round(activeJobs.reduce((acc, j) => acc + j.matchScore, 0) / activeJobs.length) 
+                : 0;
+
             document.getElementById('match-rate').innerText = `${avgMatch}%`;
             document.getElementById('opportunity-count').innerText = activeJobs.length;
 
-            jobListEl.innerHTML = mappedJobs.map(job => `
+            renderDashboardJobs();
+            filterJobs();
+        }
+
+        function renderDashboardJobs() {
+            const listEl = document.getElementById('top-job-list');
+            const topJobs = [...activeJobs].sort((a, b) => b.matchScore - a.matchScore).slice(0, 3);
+
+            if (topJobs.length === 0) {
+                listEl.innerHTML = `<p class="text-xs text-gray-500 italic">No job postings available.</p>`;
+                return;
+            }
+
+            listEl.innerHTML = topJobs.map(job => renderJobCard(job)).join('');
+        }
+
+        function filterJobs() {
+            const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+            const sortBy = document.getElementById('sort-select')?.value || 'match';
+            const listEl = document.getElementById('all-job-list');
+
+            let filtered = activeJobs.filter(job => {
+                const titleMatch = (job.title || '').toLowerCase().includes(query);
+                const companyMatch = (job.company || '').toLowerCase().includes(query);
+                const skillMatch = (job.skills || []).some(s => s.toLowerCase().includes(query));
+                return titleMatch || companyMatch || skillMatch;
+            });
+
+            if (sortBy === 'match') {
+                filtered.sort((a, b) => b.matchScore - a.matchScore);
+            } else if (sortBy === 'title') {
+                filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+            }
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `<p class="text-xs text-gray-500 italic">No matching job positions found.</p>`;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(job => renderJobCard(job)).join('');
+        }
+
+        function renderJobCard(job) {
+            const isApplied = submittedApplications.some(app => app.jobId === job.id);
+
+            return `
                 <div class="p-4 bg-black/60 rounded-xl border border-gray-800/80 flex flex-col sm:flex-row justify-between sm:items-center gap-4 hover:border-emerald-500/30 transition">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
                             <h4 class="font-bold text-white text-sm">${job.title}</h4>
-                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${job.matchScore >= 70 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-gray-800 text-gray-400'}">
                                 ${job.matchScore}% Match
                             </span>
                         </div>
@@ -290,14 +400,19 @@
                             `).join('')}
                         </div>
                     </div>
-                    <button onclick="applyJob('${job.id}', ${job.matchScore})" class="bg-gradient-to-r from-emerald-400 to-emerald-500 text-black text-xs font-bold px-4 py-2 rounded-xl hover:opacity-90 transition whitespace-nowrap shadow-[0_0_15px_rgba(0,255,136,0.2)]">
-                        Apply Position
-                    </button>
+                    ${isApplied ? `
+                        <span class="text-xs text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl text-center">Applied</span>
+                    ` : `
+                        <button onclick="applyJob('${job.id}', '${job.title}', '${job.company}',${job.matchScore})" class="bg-gradient-to-r from-emerald-400 to-emerald-500 text-black text-xs font-bold px-4 py-2 rounded-xl hover:opacity-90 transition whitespace-nowrap shadow-[0_0_15px_rgba(0,255,136,0.2)]">
+                            Apply Position
+                        </button>
+                    `}
                 </div>
-            `).join('');
+            `;
         }
 
-        async function applyJob(jobId, matchScore) {
+        // Application Pipeline
+        async function applyJob(jobId, title, company, matchScore) {
             try {
                 const res = await fetch('/api/apply', {
                     method: 'POST',
@@ -312,7 +427,17 @@
 
                 const data = await res.json();
                 if (data.success) {
-                    alert('Application dispatched successfully!');
+                    submittedApplications.push({
+                        jobId,
+                        title,
+                        company,
+                        matchScore,
+                        date: new Date().toLocaleTimeString()
+                    });
+
+                    updateApplicationsUI();
+                    computeMatches();
+
                     socket.emit('application_submitted', {
                         jobId,
                         studentName: currentUser.name,
@@ -321,10 +446,33 @@
                     });
                 }
             } catch (err) {
-                alert('Failed to submit application.');
+                alert('Application submission failed.');
             }
         }
 
+        function updateApplicationsUI() {
+            document.getElementById('app-count-badge').innerText = submittedApplications.length;
+            const container = document.getElementById('applications-list');
+
+            if (submittedApplications.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 italic">No applications submitted yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = submittedApplications.map(app => `
+                <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex justify-between items-center">
+                    <div>
+                        <h4 class="font-bold text-white text-sm">${app.title}</h4>
+                        <p class="text-xs text-gray-400">${app.company} &bull; Submitted at ${app.date}</p>
+                    </div>
+                    <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full">
+                        Match Index: ${app.matchScore}%
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        // Live Socket Listeners
         socket.on('system_broadcast', (msg) => {
             const alertBox = document.getElementById('broadcast-alert');
             document.getElementById('broadcast-msg-text').innerText = `📢 BROADCAST: ${msg}`;
