@@ -276,7 +276,6 @@
             if (currentUser?.role === 'university') fetchUniversityJobs();
         });
 
-        // FIXED: Automatically update university stream in real-time when new application arrives
         socket.on('new_application', (app) => {
             if (currentUser?.role === 'university') {
                 fetchUniversityApplications();
@@ -498,10 +497,19 @@
 
         async function applyJob(jobId) {
             const email = `${currentUser.name.toLowerCase().replace(/\s+/g, '')}@student.edu`;
+            const targetJob = activeJobs.find(j => j._id === jobId);
+            const matchScore = targetJob ? targetJob.matchScore : 0;
+
             const res = await fetch('/api/applications', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ jobId, studentName: currentUser.name, studentEmail: email, studentSkills: currentUser.needs })
+                body: JSON.stringify({ 
+                    jobId, 
+                    studentName: currentUser.name, 
+                    studentEmail: email, 
+                    studentSkills: currentUser.needs,
+                    matchScore: matchScore 
+                })
             });
             const data = await res.json();
             if (data.success) fetchApplications();
@@ -540,29 +548,46 @@
         }
 
         async function fetchUniversityApplications() {
-            const res = await fetch('/api/applications/all');
-            const data = await res.json();
-            const container = document.getElementById('univ-applications-list');
-            if (data.success && data.applications.length) {
-                container.innerHTML = data.applications.map(app => `
-                    <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                        <div>
-                            <h4 class="font-bold text-white text-sm">${app.studentName} &rarr; ${app.jobId?.title || 'Position'}</h4>
-                            <p class="text-xs text-gray-400">${app.studentEmail} &bull; Company: ${app.jobId?.company || 'N/A'}</p>
-                            <div class="flex gap-1 mt-1 font-mono">${app.skills.map(s => `<span class="text-[9px] px-1.5 py-0.5 rounded bg-gray-900 text-emerald-400 border border-gray-800">${s}</span>`).join('')}</div>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2.5 py-1 rounded-lg">Match: ${app.matchScore}%</span>
-                            <select onchange="updateAppStatus('${app._id}', this.value)" class="bg-black border border-gray-700 text-xs text-white rounded-lg px-2.5 py-1.5 font-mono focus:outline-none focus:border-cyan-400">
-                                <option value="Pending" ${app.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                                <option value="Shortlisted" ${app.status === 'Shortlisted' ? 'selected' : ''}>Shortlisted</option>
-                                <option value="Rejected" ${app.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
-                            </select>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = `<p class="text-xs text-gray-500 italic">No applications recorded in network telemetry.</p>`;
+            try {
+                const res = await fetch('/api/applications/all');
+                const data = await res.json();
+                const container = document.getElementById('univ-applications-list');
+                
+                if (data.success && data.applications && data.applications.length > 0) {
+                    container.innerHTML = data.applications.map(app => {
+                        const skillsArray = app.skills || app.studentSkills || [];
+                        const displayMatch = app.matchScore !== undefined ? app.matchScore : 0;
+                        const jobTitle = app.jobId?.title || app.jobTitle || 'Position';
+                        const jobCompany = app.jobId?.company || app.company || 'N/A';
+                        const studentName = app.studentName || 'Unknown Student';
+                        const studentEmail = app.studentEmail || 'No email provided';
+
+                        return `
+                            <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                                <div>
+                                    <h4 class="font-bold text-white text-sm">${studentName} &rarr; ${jobTitle}</h4>
+                                    <p class="text-xs text-gray-400">${studentEmail} &bull; Company: ${jobCompany}</p>
+                                    <div class="flex gap-1 mt-1 font-mono flex-wrap">
+                                        ${Array.isArray(skillsArray) ? skillsArray.map(s => `<span class="text-[9px] px-1.5 py-0.5 rounded bg-gray-900 text-emerald-400 border border-gray-800">${s}</span>`).join('') : ''}
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2.5 py-1 rounded-lg">Match: ${displayMatch}%</span>
+                                    <select onchange="updateAppStatus('${app._id}', this.value)" class="bg-black border border-gray-700 text-xs text-white rounded-lg px-2.5 py-1.5 font-mono focus:outline-none focus:border-cyan-400">
+                                        <option value="Pending" ${app.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                        <option value="Shortlisted" ${app.status === 'Shortlisted' ? 'selected' : ''}>Shortlisted</option>
+                                        <option value="Rejected" ${app.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                                    </select>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    container.innerHTML = `<p class="text-xs text-gray-500 italic">No applications recorded in network telemetry.</p>`;
+                }
+            } catch (err) {
+                console.error("Error fetching university applications:", err);
+                document.getElementById('univ-applications-list').innerHTML = `<p class="text-xs text-red-400 italic">Failed to synchronize application stream.</p>`;
             }
         }
 
