@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex University | Faculty & Admin Portal</title>
+    <title>Apex University | Portal Terminal</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -67,14 +67,11 @@
             box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.15);
         }
 
-        /* Animated Interactive Elements */
         .interactive-element {
             transition: all 0.25s ease;
-            position: relative;
         }
-        
         .interactive-element:hover {
-            transform: scale(1.02);
+            transform: scale(1.01);
         }
 
         .glow-text { 
@@ -82,68 +79,105 @@
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #030712;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1f2937;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6366f1;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #030712; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
     </style>
 </head>
 <body class="antialiased selection:bg-indigo-500 selection:text-white">
 
-    <!-- Authentication Screen -->
+    <!-- Global Dual-Mode Authentication Screen -->
     <div id="login-screen" class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-        <!-- Ambient Decorative Background Lights -->
         <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none animate-float"></div>
         <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none animate-float" style="animation-delay: -2s;"></div>
 
         <div class="glass-card p-8 rounded-2xl w-full max-w-md relative z-10 shadow-2xl border border-gray-800">
-            <div class="flex justify-center mb-6">
-                <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono tracking-widest bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span> ADMIN TERMINAL ONLINE
+            <!-- Portal Mode Selector -->
+            <div class="flex items-center justify-center bg-black/60 p-1 rounded-xl border border-gray-800 mb-6">
+                <button id="mode-student-btn" onclick="selectLoginMode('student')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white shadow-md">
+                    Student Portal
+                </button>
+                <button id="mode-admin-btn" onclick="selectLoginMode('admin')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-gray-400 hover:text-white">
+                    Faculty / Admin
+                </button>
+            </div>
+
+            <div class="flex justify-center mb-4">
+                <span id="terminal-badge" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> STUDENT TERMINAL ONLINE
                 </span>
             </div>
 
-            <h2 id="portal-title" class="text-3xl font-extrabold text-center tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+            <h2 class="text-3xl font-extrabold text-center tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
                 Apex University
             </h2>
-            <p class="text-xs text-gray-400 text-center mt-1 mb-8">Faculty & Administrative Management Portal</p>
+            <p id="portal-subheading" class="text-xs text-gray-400 text-center mt-1 mb-6">Student Career & Opportunity Hub</p>
 
             <div id="error-msg" class="text-red-400 text-xs hidden mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl transition-all"></div>
 
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs font-mono text-gray-400 mb-1">FACULTY AUTHENTICATION KEY</label>
-                    <input type="password" id="auth-token" value="ADMIN123" placeholder="e.g. ADMIN123" 
+                    <label id="auth-label" class="block text-xs font-mono text-gray-400 mb-1">STUDENT ID / ACCESS KEY</label>
+                    <input type="password" id="auth-token" value="STUDENT123" placeholder="Enter key..." 
                            onkeypress="if(event.key === 'Enter') login()" 
                            class="w-full bg-black/60 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500 transition-all">
                 </div>
 
                 <button onclick="login()" class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold py-3.5 rounded-xl hover:opacity-95 active:scale-[0.98] transition-all duration-200 shadow-[0_0_20px_rgba(99,102,241,0.3)] animate-pulseGlow">
-                    Access Administrative Hub &rarr;
+                    Access Terminal &rarr;
                 </button>
             </div>
             
-            <p class="text-[11px] text-gray-500 text-center mt-6">Default faculty key: <code class="text-indigo-400">ADMIN123</code></p>
+            <p id="auth-hint" class="text-[11px] text-gray-500 text-center mt-6">
+                Default student key: <code class="text-indigo-400">STUDENT123</code>
+            </p>
         </div>
     </div>
 
-    <!-- Main Admin Dashboard Terminal -->
+    <!-- Student Dashboard Screen -->
+    <div id="student-dashboard" class="hidden min-h-screen p-4 md:p-8">
+        <div class="max-w-7xl mx-auto space-y-6">
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400 text-xl shadow-inner">
+                        S
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-mono tracking-widest text-emerald-400 uppercase">Student Portal</span>
+                        <h1 id="student-greeting" class="text-2xl font-black text-white tracking-tight">Student Dashboard</h1>
+                    </div>
+                </div>
+
+                <button onclick="logout()" class="text-xs bg-gray-900/80 hover:bg-red-500/10 text-gray-400 hover:text-red-400 px-4 py-2 rounded-xl border border-gray-800 transition-all">
+                    Logout
+                </button>
+            </header>
+
+            <!-- Available Jobs List -->
+            <div class="glass-card p-6 rounded-2xl space-y-4">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Available University Opportunities</h3>
+                <div id="student-jobs-list" class="space-y-3">
+                    <!-- Dynamic Jobs render here -->
+                </div>
+            </div>
+
+            <!-- Student Submitted Applications Status -->
+            <div class="glass-card p-6 rounded-2xl space-y-4">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider">My Application Tracker</h3>
+                <div id="student-apps-tracker" class="space-y-3">
+                    <!-- Dynamic Applications status render here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin / Faculty Dashboard Screen -->
     <div id="dashboard-screen" class="hidden min-h-screen p-4 md:p-8">
         <div class="max-w-7xl mx-auto space-y-6">
-            
-            <!-- Global Navigation Header -->
             <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 glass-card p-6 rounded-2xl">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-400 text-xl shadow-inner" id="user-initial">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-400 text-xl shadow-inner">
                         A
                     </div>
                     <div>
@@ -152,95 +186,61 @@
                     </div>
                 </div>
 
-                <!-- Navigation Tabs -->
                 <div class="flex items-center gap-1.5 bg-black/60 p-1.5 rounded-xl border border-gray-800/80 overflow-x-auto">
-                    <button onclick="switchTab('analytics')" id="tab-btn-analytics" class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 bg-indigo-600 text-white shadow-lg">
-                        Overview Analytics
-                    </button>
-                    <button onclick="switchTab('manage-jobs')" id="tab-btn-manage-jobs" class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 text-gray-400 hover:text-white hover:bg-white/5">
-                        Manage Postings
-                    </button>
-                    <button onclick="switchTab('review-apps')" id="tab-btn-review-apps" class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 text-gray-400 hover:text-white hover:bg-white/5">
-                        Applications (<span id="total-apps-badge">0</span>)
-                    </button>
-                    <button onclick="switchTab('broadcast')" id="tab-btn-broadcast" class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 text-gray-400 hover:text-white hover:bg-white/5">
-                        System Broadcasts
-                    </button>
+                    <button onclick="switchTab('analytics')" id="tab-btn-analytics" class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 bg-indigo-600 text-white shadow-lg">Overview Analytics</button>
+                    <button onclick="switchTab('manage-jobs')" id="tab-btn-manage-jobs" class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 text-gray-400 hover:text-white hover:bg-white/5">Manage Postings</button>
+                    <button onclick="switchTab('review-apps')" id="tab-btn-review-apps" class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 text-gray-400 hover:text-white hover:bg-white/5">Applications (<span id="total-apps-badge">0</span>)</button>
+                    <button onclick="switchTab('broadcast')" id="tab-btn-broadcast" class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 text-gray-400 hover:text-white hover:bg-white/5">System Broadcasts</button>
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <span id="socket-status" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs bg-black/60 border border-indigo-500/30 text-indigo-400 font-mono">
-                        <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span> SYSTEM READY
-                    </span>
-                    <button onclick="logout()" class="text-xs bg-gray-900/80 hover:bg-red-500/10 text-gray-400 hover:text-red-400 px-3.5 py-2 rounded-xl border border-gray-800 transition-all duration-200">
+                    <button onclick="logout()" class="text-xs bg-gray-900/80 hover:bg-red-500/10 text-gray-400 hover:text-red-400 px-3.5 py-2 rounded-xl border border-gray-800 transition-all">
                         Logout
                     </button>
                 </div>
             </header>
 
-            <!-- View 1: Analytics & System Status -->
+            <!-- View 1: Analytics -->
             <div id="view-analytics" class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div class="glass-card p-6 rounded-2xl interactive-element">
+                    <div class="glass-card p-6 rounded-2xl">
                         <span class="text-xs font-mono text-gray-400 uppercase">Active Programs</span>
                         <h3 class="text-3xl font-black text-white mt-1" id="stat-active-jobs">0</h3>
-                        <p class="text-[11px] text-indigo-400 mt-2">Open for student applications</p>
                     </div>
-
-                    <div class="glass-card p-6 rounded-2xl interactive-element">
+                    <div class="glass-card p-6 rounded-2xl">
                         <span class="text-xs font-mono text-gray-400 uppercase">Total Applications</span>
                         <h3 class="text-3xl font-black text-indigo-400 glow-text mt-1" id="stat-total-apps">0</h3>
-                        <p class="text-[11px] text-gray-400 mt-2">Submitted across all roles</p>
                     </div>
-
-                    <div class="glass-card p-6 rounded-2xl interactive-element">
+                    <div class="glass-card p-6 rounded-2xl">
                         <span class="text-xs font-mono text-gray-400 uppercase">Pending Approvals</span>
                         <h3 class="text-3xl font-black text-amber-400 mt-1" id="stat-pending-apps">0</h3>
-                        <p class="text-[11px] text-gray-400 mt-2">Awaiting department review</p>
                     </div>
-
-                    <div class="glass-card p-6 rounded-2xl interactive-element">
+                    <div class="glass-card p-6 rounded-2xl">
                         <span class="text-xs font-mono text-gray-400 uppercase">Accepted Candidates</span>
                         <h3 class="text-3xl font-black text-emerald-400 mt-1" id="stat-accepted-apps">0</h3>
-                        <p class="text-[11px] text-emerald-400/80 mt-2">Approved applications</p>
-                    </div>
-                </div>
-
-                <!-- Recent Activity Matrix -->
-                <div class="glass-card p-6 rounded-2xl space-y-4">
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">System Event Log</h3>
-                    <div id="recent-activity-log" class="space-y-3 font-mono text-xs text-gray-400">
-                        <div class="p-3 bg-black/40 rounded-xl border border-gray-900 flex justify-between items-center">
-                            <span>[SYSTEM] Terminal initialized and connected to university server.</span>
-                            <span class="text-gray-600">Just now</span>
-                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- View 2: Manage Positions & Roles -->
+            <!-- View 2: Manage Jobs -->
             <div id="view-manage-jobs" class="hidden space-y-6">
-                <!-- Create New Posting Card -->
                 <div class="glass-card p-6 rounded-2xl space-y-4">
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Create New Opportunity / Position</h3>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Create New Opportunity</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <input type="text" id="job-title-input" placeholder="Role Title (e.g. TA - Physics)" class="bg-black/60 border border-gray-800 text-xs rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-all">
-                        <input type="text" id="job-company-input" placeholder="Department / Organization" class="bg-black/60 border border-gray-800 text-xs rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-all">
-                        <input type="text" id="job-skills-input" placeholder="Required Skills (comma separated)" class="bg-black/60 border border-gray-800 text-xs rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-all">
+                        <input type="text" id="job-title-input" placeholder="Role Title (e.g. TA - Physics)" class="bg-black/60 border border-gray-800 text-xs rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                        <input type="text" id="job-company-input" placeholder="Department / Organization" class="bg-black/60 border border-gray-800 text-xs rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                        <input type="text" id="job-skills-input" placeholder="Required Skills (comma separated)" class="bg-black/60 border border-gray-800 text-xs rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
                     </div>
                     <div class="flex justify-end">
-                        <button onclick="createNewJob()" class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-xs font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-all active:scale-95 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
+                        <button onclick="createNewJob()" class="bg-indigo-600 text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-indigo-500 transition-all">
                             + Publish Position
                         </button>
                     </div>
                 </div>
 
-                <!-- Existing Postings Directory -->
                 <div class="glass-card p-6 rounded-2xl space-y-4">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">Active Postings Directory</h3>
-                    <div id="admin-job-list" class="space-y-3">
-                        <p class="text-xs text-gray-500 italic">Fetching positions...</p>
-                    </div>
+                    <div id="admin-job-list" class="space-y-3"></div>
                 </div>
             </div>
 
@@ -248,9 +248,7 @@
             <div id="view-review-apps" class="hidden space-y-6">
                 <div class="glass-card p-6 rounded-2xl space-y-4">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">Student Applications Stream</h3>
-                    <div id="admin-apps-list" class="space-y-3">
-                        <p class="text-xs text-gray-500 italic">No applications found.</p>
-                    </div>
+                    <div id="admin-apps-list" class="space-y-3"></div>
                 </div>
             </div>
 
@@ -258,18 +256,14 @@
             <div id="view-broadcast" class="hidden space-y-6">
                 <div class="glass-card p-6 rounded-2xl space-y-4">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">Broadcast System Announcement</h3>
-                    <p class="text-xs text-gray-400">Send a real-time broadcast message to all currently connected student terminals.</p>
-                    
-                    <textarea id="broadcast-message-input" rows="4" placeholder="Type administrative notification or campus update here..." class="w-full bg-black/60 border border-gray-800 text-xs rounded-xl p-4 text-white focus:outline-none focus:border-indigo-500 transition-all"></textarea>
-                    
+                    <textarea id="broadcast-message-input" rows="4" placeholder="Type administrative notification..." class="w-full bg-black/60 border border-gray-800 text-xs rounded-xl p-4 text-white focus:outline-none focus:border-indigo-500"></textarea>
                     <div class="flex justify-end">
-                        <button onclick="sendBroadcast()" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white text-xs font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-all active:scale-95 shadow-[0_0_15px_rgba(112,0,255,0.3)]">
+                        <button onclick="sendBroadcast()" class="bg-purple-600 text-white text-xs font-bold px-6 py-3 rounded-xl hover:bg-purple-500 transition-all">
                             📢 Broadcast Message Live
                         </button>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -278,12 +272,12 @@
     <script>
         let socket = null;
         try {
-            socket = io();
-        } catch(e) {
-            console.warn('Socket server offline. Fallback client mode active.');
-        }
+            if (typeof io !== 'undefined') socket = io();
+        } catch(e) {}
 
+        let activeRole = 'student'; // 'student' or 'admin'
         let currentUser = null;
+
         let activeJobs = [
             { _id: 'j1', title: 'Research Assistant - AI Lab', company: 'Dept of Computer Science', skillRequired: 'Python, Machine Learning, Data Science' },
             { _id: 'j2', title: 'Full Stack Portal Engineer', company: 'University IT Services', skillRequired: 'Web Development, JavaScript, React, Node.js' },
@@ -291,70 +285,76 @@
         ];
 
         let submittedApplications = [
-            { _id: 'a1', jobId: 'j1', studentName: 'Alex Mercer', studentEmail: 'alex.mercer@apex.edu', status: 'Under Review', matchScore: 85 },
-            { _id: 'a2', jobId: 'j2', studentName: 'Samantha Vance', studentEmail: 's.vance@apex.edu', status: 'Approved', matchScore: 92 }
+            { _id: 'a1', jobId: 'j1', studentName: 'Alex Mercer', studentEmail: 'alex.mercer@apex.edu', status: 'Under Review' },
+            { _id: 'a2', jobId: 'j2', studentName: 'Samantha Vance', studentEmail: 's.vance@apex.edu', status: 'Approved' }
         ];
 
-        // Auth Logic
-        async function login() {
+        function selectLoginMode(mode) {
+            activeRole = mode;
+            const studentBtn = document.getElementById('mode-student-btn');
+            const adminBtn = document.getElementById('mode-admin-btn');
+            const badge = document.getElementById('terminal-badge');
+            const sub = document.getElementById('portal-subheading');
+            const label = document.getElementById('auth-label');
+            const tokenInput = document.getElementById('auth-token');
+            const hint = document.getElementById('auth-hint');
+
+            if (mode === 'student') {
+                studentBtn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white shadow-md';
+                adminBtn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all text-gray-400 hover:text-white';
+                badge.className = 'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> STUDENT TERMINAL ONLINE';
+                sub.innerText = 'Student Career & Opportunity Hub';
+                label.innerText = 'STUDENT ID / ACCESS KEY';
+                tokenInput.value = 'STUDENT123';
+                hint.innerHTML = 'Default student key: <code class="text-indigo-400">STUDENT123</code>';
+            } else {
+                adminBtn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white shadow-md';
+                studentBtn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all text-gray-400 hover:text-white';
+                badge.className = 'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono tracking-widest bg-indigo-500/10 text-indigo-400 border border-indigo-500/20';
+                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span> ADMIN TERMINAL ONLINE';
+                sub.innerText = 'Faculty & Administrative Management Portal';
+                label.innerText = 'FACULTY AUTHENTICATION KEY';
+                tokenInput.value = 'ADMIN123';
+                hint.innerHTML = 'Default faculty key: <code class="text-indigo-400">ADMIN123</code>';
+            }
+        }
+
+        function login() {
             const token = document.getElementById('auth-token').value.trim();
             const errBox = document.getElementById('error-msg');
             errBox.classList.add('hidden');
 
             if (!token) {
-                errBox.innerText = 'Please specify a valid faculty authentication key.';
+                errBox.innerText = 'Please enter an access key.';
                 errBox.classList.remove('hidden');
                 return;
             }
 
-            try {
-                const res = await fetch('/api/auth', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token })
-                });
-
-                if (!res.ok) throw new Error('API unreachable');
-                const data = await res.json();
-
-                if (data.success && data.role === 'admin') {
-                    currentUser = data.data;
-                    completeLogin();
-                } else {
-                    showError(data.message || 'Invalid administrative credentials.');
-                }
-            } catch (err) {
-                // Standalone Mock Fallback
-                currentUser = {
-                    name: 'Dr. Evelyn Carter',
-                    token: token,
-                    role: 'admin'
-                };
-                completeLogin();
+            if (activeRole === 'admin' && token === 'ADMIN123') {
+                currentUser = { name: 'Dr. Evelyn Carter', role: 'admin' };
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard-screen').classList.remove('hidden');
+                document.getElementById('user-greeting').innerText = `Welcome, ${currentUser.name}`;
+                renderAdminJobs();
+                renderAdminApps();
+                updateStats();
+            } else if (activeRole === 'student' && token === 'STUDENT123') {
+                currentUser = { name: 'Alex Mercer', role: 'student', email: 'alex.mercer@apex.edu' };
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('student-dashboard').classList.remove('hidden');
+                document.getElementById('student-greeting').innerText = `Welcome, ${currentUser.name}`;
+                renderStudentJobs();
+                renderStudentApps();
+            } else {
+                errBox.innerText = 'Invalid credentials for chosen portal.';
+                errBox.classList.remove('hidden');
             }
-        }
-
-        function completeLogin() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('dashboard-screen').classList.remove('hidden');
-            document.getElementById('user-greeting').innerText = `Welcome, ${currentUser.name}`;
-
-            if (socket) {
-                socket.emit('user_login', { name: currentUser.name, role: currentUser.role });
-            }
-
-            fetchJobs();
-            fetchApplications();
-        }
-
-        function showError(msg) {
-            const errBox = document.getElementById('error-msg');
-            errBox.innerText = msg;
-            errBox.classList.remove('hidden');
         }
 
         function logout() {
             currentUser = null;
+            document.getElementById('student-dashboard').classList.add('hidden');
             document.getElementById('dashboard-screen').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
         }
@@ -363,197 +363,141 @@
             ['analytics', 'manage-jobs', 'review-apps', 'broadcast'].forEach(t => {
                 document.getElementById(`view-${t}`).classList.add('hidden');
                 const btn = document.getElementById(`tab-btn-${t}`);
-                if (btn) btn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 text-gray-400 hover:text-white hover:bg-white/5';
+                if (btn) btn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition-all text-gray-400 hover:text-white hover:bg-white/5';
             });
-
             document.getElementById(`view-${tab}`).classList.remove('hidden');
             const activeBtn = document.getElementById(`tab-btn-${tab}`);
-            if (activeBtn) activeBtn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 bg-indigo-600 text-white shadow-lg';
+            if (activeBtn) activeBtn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white shadow-lg';
         }
 
-        async function fetchJobs() {
-            try {
-                const res = await fetch('/api/jobs');
-                const data = await res.json();
-                if (data.success) {
-                    activeJobs = data.jobs || activeJobs;
-                }
-            } catch (err) {}
-            renderAdminJobs();
-            updateStats();
-        }
-
-        async function fetchApplications() {
-            try {
-                const res = await fetch('/api/applications');
-                const data = await res.json();
-                if (data.success) {
-                    submittedApplications = data.applications || submittedApplications;
-                }
-            } catch (err) {}
-            renderAdminApps();
-            updateStats();
-        }
-
-        function updateStats() {
-            document.getElementById('stat-active-jobs').innerText = activeJobs.length;
-            document.getElementById('stat-total-apps').innerText = submittedApplications.length;
-            document.getElementById('total-apps-badge').innerText = submittedApplications.length;
-
-            const pending = submittedApplications.filter(a => a.status === 'Under Review').length;
-            const accepted = submittedApplications.filter(a => a.status === 'Approved').length;
-
-            document.getElementById('stat-pending-apps').innerText = pending;
-            document.getElementById('stat-accepted-apps').innerText = accepted;
-        }
-
-        function renderAdminJobs() {
-            const container = document.getElementById('admin-job-list');
-            if (activeJobs.length === 0) {
-                container.innerHTML = `<p class="text-xs text-gray-500 italic">No active positions posted.</p>`;
-                return;
-            }
-
+        // Student Handlers
+        function renderStudentJobs() {
+            const container = document.getElementById('student-jobs-list');
             container.innerHTML = activeJobs.map(job => `
                 <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex justify-between items-center interactive-element">
                     <div>
                         <h4 class="font-bold text-white text-sm">${job.title}</h4>
                         <p class="text-xs text-gray-400 mb-1">${job.company}</p>
-                        <div class="flex flex-wrap gap-1">
-                            ${(job.skillRequired || '').split(',').map(s => `
-                                <span class="text-[10px] px-2 py-0.5 rounded bg-gray-900 text-indigo-400 border border-gray-800 font-mono">${s.trim()}</span>
-                            `).join('')}
-                        </div>
+                        <p class="text-[10px] text-indigo-400 font-mono">${job.skillRequired}</p>
                     </div>
-                    <button onclick="deleteJob('${job._id}')" class="text-xs text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-lg transition-all">
-                        Remove
+                    <button onclick="applyForJob('${job._id}')" class="bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 text-xs px-4 py-2 rounded-xl transition-all">
+                        Apply Now
                     </button>
                 </div>
             `).join('');
         }
 
-        async function createNewJob() {
-            const title = document.getElementById('job-title-input').value.trim();
-            const company = document.getElementById('job-company-input').value.trim();
-            const skillRequired = document.getElementById('job-skills-input').value.trim();
+        function applyForJob(jobId) {
+            const exists = submittedApplications.some(a => a.jobId === jobId && a.studentName === currentUser.name);
+            if (exists) {
+                alert('You have already submitted an application for this position.');
+                return;
+            }
+            submittedApplications.push({
+                _id: 'a' + Date.now(),
+                jobId,
+                studentName: currentUser.name,
+                studentEmail: currentUser.email,
+                status: 'Under Review'
+            });
+            alert('Application submitted successfully!');
+            renderStudentApps();
+        }
 
-            if (!title || !company || !skillRequired) {
-                alert('Please fill in all job posting fields.');
+        function renderStudentApps() {
+            const container = document.getElementById('student-apps-tracker');
+            const myApps = submittedApplications.filter(a => a.studentName === currentUser.name);
+            
+            if (myApps.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 italic">No applications submitted yet.</p>`;
                 return;
             }
 
-            const newJob = { _id: 'j' + Date.now(), title, company, skillRequired };
+            container.innerHTML = myApps.map(app => {
+                const job = activeJobs.find(j => j._id === app.jobId) || { title: 'Position' };
+                return `
+                    <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold text-white text-sm">${job.title}</h4>
+                            <p class="text-xs text-gray-400">${app.studentEmail}</p>
+                        </div>
+                        <span class="text-xs font-mono px-3 py-1 rounded-full ${app.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+                            ${app.status}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
 
-            try {
-                const res = await fetch('/api/jobs', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newJob)
-                });
-                const data = await res.json();
-                if (data.success && data.job) {
-                    activeJobs.unshift(data.job);
-                } else {
-                    activeJobs.unshift(newJob);
-                }
-            } catch (err) {
-                activeJobs.unshift(newJob);
-            }
+        // Admin Handlers
+        function updateStats() {
+            document.getElementById('stat-active-jobs').innerText = activeJobs.length;
+            document.getElementById('stat-total-apps').innerText = submittedApplications.length;
+            document.getElementById('total-apps-badge').innerText = submittedApplications.length;
+            document.getElementById('stat-pending-apps').innerText = submittedApplications.filter(a => a.status === 'Under Review').length;
+            document.getElementById('stat-accepted-apps').innerText = submittedApplications.filter(a => a.status === 'Approved').length;
+        }
 
-            if (socket) {
-                socket.emit('new_job_posted', newJob);
-            }
+        function renderAdminJobs() {
+            const container = document.getElementById('admin-job-list');
+            container.innerHTML = activeJobs.map(job => `
+                <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex justify-between items-center">
+                    <div>
+                        <h4 class="font-bold text-white text-sm">${job.title}</h4>
+                        <p class="text-xs text-gray-400">${job.company}</p>
+                    </div>
+                    <button onclick="deleteJob('${job._id}')" class="text-xs text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-lg">Remove</button>
+                </div>
+            `).join('');
+        }
 
+        function createNewJob() {
+            const title = document.getElementById('job-title-input').value.trim();
+            const company = document.getElementById('job-company-input').value.trim();
+            const skillRequired = document.getElementById('job-skills-input').value.trim();
+            if (!title || !company || !skillRequired) return alert('Fill all fields');
+
+            activeJobs.unshift({ _id: 'j' + Date.now(), title, company, skillRequired });
             document.getElementById('job-title-input').value = '';
             document.getElementById('job-company-input').value = '';
             document.getElementById('job-skills-input').value = '';
-
-            logEvent(`Published new job: ${title}`);
             renderAdminJobs();
             updateStats();
         }
 
-        async function deleteJob(jobId) {
-            activeJobs = activeJobs.filter(j => j._id !== jobId);
-            try {
-                await fetch(`/api/jobs/${jobId}`, { method: 'DELETE' });
-            } catch (err) {}
-
-            if (socket) {
-                socket.emit('job_deleted', jobId);
-            }
-
-            logEvent(`Removed job posting ID: ${jobId}`);
+        function deleteJob(id) {
+            activeJobs = activeJobs.filter(j => j._id !== id);
             renderAdminJobs();
             updateStats();
         }
 
         function renderAdminApps() {
             const container = document.getElementById('admin-apps-list');
-            if (submittedApplications.length === 0) {
-                container.innerHTML = `<p class="text-xs text-gray-500 italic">No applications available.</p>`;
-                return;
-            }
-
             container.innerHTML = submittedApplications.map(app => {
                 const job = activeJobs.find(j => j._id === app.jobId) || { title: 'Position' };
                 return `
-                    <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex flex-col md:flex-row justify-between md:items-center gap-4 interactive-element">
+                    <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex justify-between items-center">
                         <div>
-                            <div class="flex items-center gap-2">
-                                <h4 class="font-bold text-white text-sm">${app.studentName}</h4>
-                                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${app.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
-                                    ${app.status}
-                                </span>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-0.5">Applied for: <span class="text-indigo-400 font-medium">${job.title}</span> &bull; ${app.studentEmail}</p>
+                            <h4 class="font-bold text-white text-sm">${app.studentName}</h4>
+                            <p class="text-xs text-gray-400">Position: ${job.title}</p>
                         </div>
-                        
-                        <div class="flex items-center gap-2">
-                            <button onclick="updateAppStatus('${app._id}', 'Approved')" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-xs px-3 py-1.5 rounded-lg transition-all">
-                                Approve
-                            </button>
-                            <button onclick="updateAppStatus('${app._id}', 'Rejected')" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs px-3 py-1.5 rounded-lg transition-all">
-                                Reject
-                            </button>
+                        <div class="flex gap-2">
+                            <button onclick="updateAppStatus('${app._id}', 'Approved')" class="bg-emerald-500/10 text-emerald-400 text-xs px-3 py-1.5 rounded-lg">Approve</button>
+                            <button onclick="updateAppStatus('${app._id}', 'Rejected')" class="bg-red-500/10 text-red-400 text-xs px-3 py-1.5 rounded-lg">Reject</button>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function updateAppStatus(appId, status) {
-            const app = submittedApplications.find(a => a._id === appId);
-            if (app) {
-                app.status = status;
-                logEvent(`Updated application status for ${app.studentName} to ${status}`);
-                renderAdminApps();
-                updateStats();
-            }
+        function updateAppStatus(id, status) {
+            const app = submittedApplications.find(a => a._id === id);
+            if (app) { app.status = status; renderAdminApps(); updateStats(); }
         }
 
         function sendBroadcast() {
-            const msg = document.getElementById('broadcast-message-input').value.trim();
-            if (!msg) {
-                alert('Please type a broadcast message.');
-                return;
-            }
-
-            if (socket) {
-                socket.emit('server_broadcast', msg);
-            }
-
-            logEvent(`Broadcast sent: "${msg}"`);
-            alert('Broadcast dispatched to active student terminals.');
+            alert('Broadcast message dispatched.');
             document.getElementById('broadcast-message-input').value = '';
-        }
-
-        function logEvent(text) {
-            const logContainer = document.getElementById('recent-activity-log');
-            const entry = document.createElement('div');
-            entry.className = 'p-3 bg-black/40 rounded-xl border border-gray-900 flex justify-between items-center';
-            entry.innerHTML = `<span>[ADMIN] ${text}</span><span class="text-gray-600">${new Date().toLocaleTimeString()}</span>`;
-            logContainer.prepend(entry);
         }
     </script>
 </body>
