@@ -2,6 +2,7 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkillForge Live | Gen-Z Cyber Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -76,7 +77,11 @@
                 </div>
             </header>
 
-            <div id="broadcast-alert" class="hidden glass-card border-emerald-500/50 p-4 rounded-xl text-emerald-300 text-sm animate-bounce"></div>
+            <!-- Real-Time System Broadcast Alert -->
+            <div id="broadcast-alert" class="hidden glass-card border-emerald-500/50 p-4 rounded-xl text-emerald-300 text-sm font-mono flex items-center justify-between animate-bounce">
+                <span id="broadcast-msg-text">Broadcast message will appear here</span>
+                <button onclick="document.getElementById('broadcast-alert').classList.add('hidden')" class="text-xs text-gray-400 hover:text-white">&times;</button>
+            </div>
 
             <!-- Interactive Skills Manager -->
             <div class="glass-card p-6 rounded-2xl">
@@ -104,8 +109,8 @@
                 <div class="glass-card p-6 rounded-2xl md:col-span-1 space-y-4">
                     <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">Match Telemetry</h3>
                     <div class="p-4 bg-black/50 rounded-xl border border-gray-800/80">
-                        <span class="text-3xl font-black text-emerald-400 glow-text" id="match-rate">100%</span>
-                        <p class="text-[11px] text-gray-400 mt-1">Profile Compatibility Rate</p>
+                        <span class="text-3xl font-black text-emerald-400 glow-text" id="match-rate">--</span>
+                        <p class="text-[11px] text-gray-400 mt-1">Average Profile Match Score</p>
                     </div>
                     <div class="p-4 bg-black/50 rounded-xl border border-gray-800/80">
                         <span class="text-2xl font-bold text-cyan-400" id="opportunity-count">0</span>
@@ -125,7 +130,192 @@
         </div>
     </div>
 
+    <!-- Client-Side Engine Integration Script -->
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/app.js"></script>
+    <script>
+        const socket = io();
+        let currentUser = null;
+        let activeJobs = [];
+
+        async function login() {
+            const token = document.getElementById('auth-token').value.trim();
+            const errBox = document.getElementById('error-msg');
+            errBox.classList.add('hidden');
+
+            if (!token) {
+                errBox.innerText = 'Security Token required.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+
+                const data = await res.json();
+                if (data.success && data.role === 'student') {
+                    currentUser = data.user;
+                    
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('dashboard-screen').classList.remove('hidden');
+                    document.getElementById('user-greeting').innerText = `Welcome, ${currentUser.name}`;
+
+                    // Register with Socket Server
+                    socket.emit('register_user', { name: currentUser.name, role: 'student' });
+
+                    renderSkills();
+                    fetchJobs();
+                } else {
+                    errBox.innerText = data.message || 'Authentication failed. Valid token required.';
+                    errBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                errBox.innerText = 'Server unreachable. Verify backend connections.';
+                errBox.classList.remove('hidden');
+            }
+        }
+
+        function renderSkills() {
+            const container = document.getElementById('student-skills');
+            if (!currentUser || !currentUser.skills || currentUser.skills.length === 0) {
+                container.innerHTML = `<span class="text-xs text-gray-500 italic">No skills added yet.</span>`;
+                return;
+            }
+
+            container.innerHTML = currentUser.skills.map((skill, index) => `
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-mono">
+                    ${skill}
+                    <button onclick="removeSkill(${index})" class="text-gray-500 hover:text-red-400 transition">&times;</button>
+                </span>
+            `).join('');
+        }
+
+        function addSkill() {
+            const input = document.getElementById('new-skill-input');
+            const newSkill = input.value.trim();
+            if (newSkill && currentUser) {
+                if (!currentUser.skills.includes(newSkill)) {
+                    currentUser.skills.push(newSkill);
+                    renderSkills();
+                    computeMatches();
+                }
+                input.value = '';
+            }
+        }
+
+        function removeSkill(index) {
+            if (currentUser && currentUser.skills) {
+                currentUser.skills.splice(index, 1);
+                renderSkills();
+                computeMatches();
+            }
+        }
+
+        async function fetchJobs() {
+            try {
+                const res = await fetch('/api/jobs');
+                const data = await res.json();
+                if (data.success) {
+                    activeJobs = data.jobs || [];
+                    computeMatches();
+                }
+            } catch (err) {
+                console.error('Error fetching opportunity matches:', err);
+            }
+        }
+
+        function computeMatches() {
+            const jobListEl = document.getElementById('job-list');
+            const userSkills = currentUser ? currentUser.skills.map(s => s.toLowerCase()) : [];
+
+            if (activeJobs.length === 0) {
+                jobListEl.innerHTML = `<p class="text-xs text-gray-500 italic">No active job opportunities found.</p>`;
+                document.getElementById('opportunity-count').innerText = '0';
+                document.getElementById('match-rate').innerText = '0%';
+                return;
+            }
+
+            let totalScore = 0;
+            const mappedJobs = activeJobs.map(job => {
+                const requiredSkills = job.skills || [];
+                if (requiredSkills.length === 0) return { ...job, matchScore: 100 };
+
+                const matches = requiredSkills.filter(s => userSkills.includes(s.toLowerCase())).length;
+                const score = Math.round((matches / requiredSkills.length) * 100);
+                totalScore += score;
+                return { ...job, matchScore: score };
+            });
+
+            const avgMatch = Math.round(totalScore / activeJobs.length);
+            document.getElementById('match-rate').innerText = `${avgMatch}%`;
+            document.getElementById('opportunity-count').innerText = activeJobs.length;
+
+            jobListEl.innerHTML = mappedJobs.map(job => `
+                <div class="p-4 bg-black/60 rounded-xl border border-gray-800/80 flex flex-col sm:flex-row justify-between sm:items-center gap-4 hover:border-emerald-500/30 transition">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="font-bold text-white text-sm">${job.title}</h4>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                ${job.matchScore}% Match
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-2">${job.company || 'Autonomous Entity'} &bull; ${job.location || 'Remote'}</p>
+                        <div class="flex flex-wrap gap-1">
+                            ${(job.skills || []).map(s => `
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-gray-900 text-gray-400 border border-gray-800 font-mono">${s}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <button onclick="applyJob('${job.id}', ${job.matchScore})" class="bg-gradient-to-r from-emerald-400 to-emerald-500 text-black text-xs font-bold px-4 py-2 rounded-xl hover:opacity-90 transition whitespace-nowrap shadow-[0_0_15px_rgba(0,255,136,0.2)]">
+                        Apply Position
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function applyJob(jobId, matchScore) {
+            try {
+                const res = await fetch('/api/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jobId,
+                        studentName: currentUser.name,
+                        studentEmail: currentUser.email || 'student@skillforge.io',
+                        matchScore
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert('Application dispatched successfully!');
+                    socket.emit('application_submitted', {
+                        jobId,
+                        studentName: currentUser.name,
+                        studentEmail: currentUser.email || 'student@skillforge.io',
+                        matchScore
+                    });
+                }
+            } catch (err) {
+                alert('Failed to submit application.');
+            }
+        }
+
+        // Live Socket Listeners
+        socket.on('system_broadcast', (msg) => {
+            const alertBox = document.getElementById('broadcast-alert');
+            document.getElementById('broadcast-msg-text').innerText = `📢 BROADCAST: ${msg}`;
+            alertBox.classList.remove('hidden');
+        });
+
+        socket.on('settings_updated', (settings) => {
+            if (settings.portalName) {
+                document.getElementById('portal-title').innerText = settings.portalName;
+            }
+        });
+    </script>
 </body>
 </html>
