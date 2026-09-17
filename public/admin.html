@@ -72,34 +72,87 @@
                 </div>
             </header>
 
+            <!-- System Analytics Metrics -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- System Broadcast Panel -->
-                <div class="glass-card p-6 rounded-2xl space-y-4 md:col-span-1">
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Live System Broadcast</h3>
-                    <p class="text-xs text-gray-400">Push real-time banner updates directly to all active user dashboards over WebSockets.</p>
+                <div class="glass-card p-6 rounded-2xl">
+                    <p class="text-[10px] font-mono uppercase tracking-wider text-gray-400">Total Job Postings</p>
+                    <h2 id="stat-jobs" class="text-3xl font-extrabold text-white mt-2">0</h2>
+                </div>
+                <div class="glass-card p-6 rounded-2xl">
+                    <p class="text-[10px] font-mono uppercase tracking-wider text-gray-400">Total Applications</p>
+                    <h2 id="stat-apps" class="text-3xl font-extrabold text-neon-cyan mt-2">0</h2>
+                </div>
+                <div class="glass-card p-6 rounded-2xl">
+                    <p class="text-[10px] font-mono uppercase tracking-wider text-gray-400">Registered System Users</p>
+                    <h2 id="stat-users" class="text-3xl font-extrabold text-neon-green mt-2">0</h2>
+                </div>
+            </div>
 
-                    <div class="space-y-3">
-                        <textarea id="broadcast-msg" rows="3" placeholder="Type alert message..." class="w-full bg-black/80 border border-gray-800 rounded-xl p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none"></textarea>
-                        <button onclick="sendBroadcast()" class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs hover:opacity-90 transition">
-                            📢 Broadcast to Active Nodes
-                        </button>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- System Broadcast & Global Settings Panel -->
+                <div class="space-y-6 md:col-span-1">
+                    <!-- Broadcast Panel -->
+                    <div class="glass-card p-6 rounded-2xl space-y-4">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Live System Broadcast</h3>
+                        <p class="text-xs text-gray-400">Push real-time banner updates directly to all active user dashboards over WebSockets.</p>
+
+                        <div class="space-y-3">
+                            <textarea id="broadcast-msg" rows="3" placeholder="Type alert message..." class="w-full bg-black/80 border border-gray-800 rounded-xl p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none"></textarea>
+                            <button onclick="sendBroadcast()" class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs hover:opacity-90 transition">
+                                📢 Broadcast to Active Nodes
+                            </button>
+                        </div>
+
+                        <div id="broadcast-status" class="hidden text-[11px] p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"></div>
                     </div>
 
-                    <div id="broadcast-status" class="hidden text-[11px] p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"></div>
+                    <!-- Global Portal Settings Panel -->
+                    <div class="glass-card p-6 rounded-2xl space-y-4">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Global Settings</h3>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-[11px] text-gray-400 block mb-1">Portal Name</label>
+                                <input type="text" id="portal-name-input" class="w-full bg-black/80 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                            </div>
+
+                            <div class="flex items-center justify-between pt-2">
+                                <span class="text-xs text-gray-300">Maintenance Mode</span>
+                                <input type="checkbox" id="maintenance-toggle" class="w-4 h-4 accent-purple-500">
+                            </div>
+
+                            <button onclick="updateSettings()" class="w-full bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 rounded-xl text-xs border border-gray-700 transition">
+                                Save Global Config
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Active Sessions Monitor -->
-                <div class="glass-card p-6 rounded-2xl md:col-span-2">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Active WebSocket Sessions</h3>
-                            <p class="text-xs text-gray-400">Connected users emitting telemetry</p>
+                <!-- Active Sessions Monitor & Live Application Stream -->
+                <div class="space-y-6 md:col-span-2">
+                    <!-- Active Sessions Monitor -->
+                    <div class="glass-card p-6 rounded-2xl">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Active WebSocket Sessions</h3>
+                                <p class="text-xs text-gray-400">Connected users emitting telemetry</p>
+                            </div>
+                            <span id="active-count" class="text-xs font-mono font-bold bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30">0 Online</span>
                         </div>
-                        <span id="active-count" class="text-xs font-mono font-bold bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30">0 Online</span>
+
+                        <div id="user-list" class="space-y-2 max-h-[250px] overflow-y-auto">
+                            <p class="text-xs text-gray-500 italic p-4 text-center">No active users connected.</p>
+                        </div>
                     </div>
 
-                    <div id="user-list" class="space-y-2 max-h-[350px] overflow-y-auto">
-                        <p class="text-xs text-gray-500 italic p-4 text-center">No active users connected.</p>
+                    <!-- Live Application Activity Feed -->
+                    <div class="glass-card p-6 rounded-2xl">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-2">Live Application Feed</h3>
+                        <p class="text-xs text-gray-400 mb-4">Real-time applications submitted across the network</p>
+
+                        <div id="live-apps-feed" class="space-y-2 max-h-[200px] overflow-y-auto">
+                            <p class="text-xs text-gray-500 italic p-4 text-center">No recent application events.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -127,6 +180,10 @@
                 if (data.success && data.role === 'admin') {
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('dashboard-screen').classList.remove('hidden');
+                    
+                    // Fetch initial metrics and settings on login
+                    loadAdminStats();
+                    loadGlobalSettings();
                 } else {
                     errBox.innerText = 'Invalid Admin Security Token.';
                     errBox.classList.remove('hidden');
@@ -135,6 +192,41 @@
                 errBox.innerText = 'Authentication server unreachable.';
                 errBox.classList.remove('hidden');
             }
+        }
+
+        async function loadAdminStats() {
+            try {
+                const res = await fetch('/api/admin/stats');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('stat-jobs').innerText = data.stats.totalJobs;
+                    document.getElementById('stat-apps').innerText = data.stats.totalApps;
+                    document.getElementById('stat-users').innerText = data.stats.totalUsers;
+                }
+            } catch (err) {
+                console.error('Failed to load admin stats:', err);
+            }
+        }
+
+        async function loadGlobalSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('portal-name-input').value = data.settings.portalName;
+                    document.getElementById('maintenance-toggle').checked = data.settings.maintenanceMode;
+                }
+            } catch (err) {
+                console.error('Failed to load settings:', err);
+            }
+        }
+
+        function updateSettings() {
+            const portalName = document.getElementById('portal-name-input').value;
+            const maintenanceMode = document.getElementById('maintenance-toggle').checked;
+
+            socket.emit('admin_update_settings', { portalName, maintenanceMode });
+            alert('Global settings update dispatched.');
         }
 
         function sendBroadcast() {
@@ -176,6 +268,30 @@
             } else {
                 userListEl.innerHTML = `<p class="text-xs text-gray-500 italic p-4 text-center">No active users connected.</p>`;
             }
+        });
+
+        // Listen for new application socket alerts
+        socket.on('new_application', (appData) => {
+            loadAdminStats(); // Refresh counters
+
+            const feed = document.getElementById('live-apps-feed');
+            const emptyMsg = feed.querySelector('p');
+            if (emptyMsg) emptyMsg.remove();
+
+            const appItem = document.createElement('div');
+            appItem.className = 'p-3 bg-black/60 rounded-xl border border-purple-500/30 flex justify-between items-center animate-pulse';
+            appItem.innerHTML = `
+                <div>
+                    <h4 class="font-bold text-white text-xs">${appData.studentName}</h4>
+                    <p class="text-[10px] text-gray-400">${appData.studentEmail}</p>
+                </div>
+                <span class="text-xs font-mono px-2 py-1 bg-cyan-500/10 text-cyan-400 rounded-lg border border-cyan-500/20">
+                    Match: ${appData.matchScore}%
+                </span>
+            `;
+
+            feed.prepend(appItem);
+            setTimeout(() => appItem.classList.remove('animate-pulse'), 3000);
         });
     </script>
 </body>
