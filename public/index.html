@@ -58,7 +58,7 @@
             <!-- Header -->
             <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400 text-xl" id="user-initial">A</div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400 text-xl" id="user-initial">S</div>
                     <div>
                         <span class="text-[10px] font-mono tracking-widest text-emerald-400 uppercase">Student Operational Node</span>
                         <h1 id="user-greeting" class="text-2xl font-black text-white tracking-tight">Welcome</h1>
@@ -92,8 +92,8 @@
                 <div class="glass-card p-6 rounded-2xl">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                         <div>
-                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Your Active Skills (`needs`)</h3>
-                            <p class="text-xs text-gray-400">Add or remove skills to update dynamic compatibility with MongoDB jobs.</p>
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Your Active Skills</h3>
+                            <p class="text-xs text-gray-400">Add or remove skills to update dynamic compatibility with available jobs.</p>
                         </div>
                         
                         <div class="flex gap-2">
@@ -117,7 +117,7 @@
                         </div>
                         <div class="p-4 bg-black/50 rounded-xl border border-gray-800/80">
                             <span class="text-2xl font-bold text-cyan-400" id="opportunity-count">0</span>
-                            <p class="text-[11px] text-gray-400 mt-1">Total Active Roles in MongoDB</p>
+                            <p class="text-[11px] text-gray-400 mt-1">Total Active Roles</p>
                         </div>
                     </div>
 
@@ -199,7 +199,7 @@
 
                 const data = await res.json();
                 if (data.success && data.role === 'student') {
-                    currentUser = data.data; // Synced with server.js User object
+                    currentUser = data.data; // Synced with server User object
                     if (!currentUser.needs) currentUser.needs = [];
 
                     document.getElementById('login-screen').classList.add('hidden');
@@ -234,15 +234,15 @@
             ['dashboard', 'jobs', 'applications'].forEach(t => {
                 document.getElementById(`view-${t}`).classList.add('hidden');
                 const btn = document.getElementById(`tab-btn-${t}`);
-                btn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white';
+                if (btn) btn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white';
             });
 
             document.getElementById(`view-${tab}`).classList.remove('hidden');
             const activeBtn = document.getElementById(`tab-btn-${tab}`);
-            activeBtn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition bg-emerald-500 text-black';
+            if (activeBtn) activeBtn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition bg-emerald-500 text-black';
         }
 
-        // Skills Persisted to MongoDB
+        // Skills Persisted to Backend
         function renderSkills() {
             const container = document.getElementById('student-skills');
             if (!currentUser || !currentUser.needs || currentUser.needs.length === 0) {
@@ -267,7 +267,7 @@
                 });
                 computeMatches();
             } catch (err) {
-                console.error('Failed to sync skills with MongoDB:', err);
+                console.error('Failed to sync skills:', err);
             }
         }
 
