@@ -31,13 +31,22 @@ const SettingsSchema = new mongoose.Schema({
 });
 const Settings = mongoose.model('Settings', SettingsSchema);
 
+// Job Schema
+const JobSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    company: { type: String, required: true },
+    skillRequired: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
+});
+const Job = mongoose.model('Job', JobSchema);
+
 // --- MongoDB Connection & Auto-Seeding ---
 mongoose.connect(process.env.MONGO_URI)
     .then(async () => {
         console.log('MongoDB Connected');
 
-        // Auto-create users collection and default tokens if database is empty
         try {
+            // Seed Default Tokens
             const univExists = await User.findOne({ role: 'university' });
             if (!univExists) {
                 await User.create({
@@ -59,6 +68,18 @@ mongoose.connect(process.env.MONGO_URI)
                 });
                 console.log('✅ Auto-seeded Student token: STUDENT123');
             }
+
+            // Seed Initial Jobs if empty
+            const jobCount = await Job.countDocuments();
+            if (jobCount === 0) {
+                await Job.insertMany([
+                    { title: 'Full-Stack Developer Intern', company: 'TechCorp', skillRequired: 'Web Development' },
+                    { title: 'Data Scientist Associate', company: 'DataGlobe', skillRequired: 'Data Science' },
+                    { title: 'Cloud DevOps Architect', company: 'SkyNet Systems', skillRequired: 'DevOps' },
+                    { title: 'UI/UX Interactive Designer', company: 'DesignHub', skillRequired: 'UI/UX' }
+                ]);
+                console.log('✅ Auto-seeded initial job opportunities into MongoDB');
+            }
         } catch (seedErr) {
             console.error('Auto-seeding error:', seedErr);
         }
@@ -66,6 +87,8 @@ mongoose.connect(process.env.MONGO_URI)
     .catch(err => console.log('MongoDB connection error:', err));
 
 // --- API Routes ---
+
+// User Authentication
 app.post('/api/auth', async (req, res) => {
     try {
         const { token } = req.body;
@@ -80,6 +103,48 @@ app.post('/api/auth', async (req, res) => {
     }
 });
 
+// Save Student Skill Vector to MongoDB
+app.put('/api/user/skills', async (req, res) => {
+    try {
+        const { token, needs } = req.body;
+        const updatedUser = await User.findOneAndUpdate(
+            { token },
+            { needs },
+            { new: true }
+        );
+        if (!updatedUser) return res.status(404).json({ success: false, message: 'User not found' });
+        res.json({ success: true, needs: updatedUser.needs });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to persist skill updates' });
+    }
+});
+
+// Fetch All Jobs
+app.get('/api/jobs', async (req, res) => {
+    try {
+        const jobs = await Job.find().sort({ createdAt: -1 });
+        res.json({ success: true, jobs });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to fetch job collection' });
+    }
+});
+
+// Post a New Job (University)
+app.post('/api/jobs', async (req, res) => {
+    try {
+        const { title, company, skillRequired } = req.body;
+        const newJob = await Job.create({ title, company, skillRequired });
+        
+        // Emit Socket event to all active clients for real-time feed update
+        io.emit('new_job_posted', newJob);
+
+        res.json({ success: true, job: newJob });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to create job posting' });
+    }
+});
+
+// Global Settings
 app.get('/api/settings', async (req, res) => {
     try {
         let settings = await Settings.findOne({ id: 'global' });
@@ -110,7 +175,7 @@ io.on('connection', (socket) => {
     socket.on('admin_update_settings', async (newSettings) => {
         try {
             await Settings.findOneAndUpdate({ id: 'global' }, newSettings, { upsert: true });
-            io.emit('settings_updated', newSettings); // Push to all connected clients
+            io.emit('settings_updated', newSettings);
         } catch (err) {
             console.error('Error updating settings:', err);
         }
