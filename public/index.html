@@ -32,8 +32,8 @@
 
     <!-- Dashboard Screen -->
     <div id="dashboard-screen" class="hidden min-h-screen p-8">
-        <div class="max-w-4xl mx-auto">
-            <header class="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
+        <div class="max-w-4xl mx-auto space-y-6">
+            <header class="flex justify-between items-center border-b border-gray-800 pb-4">
                 <h1 id="dash-title" class="text-2xl font-bold">Dashboard</h1>
                 <div class="flex items-center gap-4">
                     <a href="/university.html" class="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-emerald-400 rounded transition">
@@ -43,12 +43,30 @@
                 </div>
             </header>
             
-            <div id="broadcast-alert" class="hidden bg-emerald-500/20 border border-emerald-500 p-4 rounded mb-6 text-emerald-300"></div>
+            <div id="broadcast-alert" class="hidden bg-emerald-500/20 border border-emerald-500 p-4 rounded text-emerald-300"></div>
 
-            <div class="grid grid-cols-2 gap-6">
-                <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl">
-                    <h3 class="text-lg mb-2">My Modules</h3>
+            <!-- Student Registered Skills Bar -->
+            <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl">
+                <h3 class="text-xs font-semibold text-gray-400 tracking-wider uppercase mb-3">Your Registered Skills</h3>
+                <div id="student-skills" class="flex flex-wrap gap-2">
+                    <span class="text-xs text-gray-500 italic">Authenticate to view skills...</span>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- System Status -->
+                <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl md:col-span-1">
+                    <h3 class="text-lg font-semibold mb-2">My Modules</h3>
                     <p class="text-gray-400 text-sm">System synced and active.</p>
+                </div>
+
+                <!-- Matched Jobs Container -->
+                <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl md:col-span-2">
+                    <h3 class="text-lg font-bold mb-4 text-white">Matched Opportunities</h3>
+                    <div id="job-list" class="grid gap-4">
+                        <p class="text-xs text-gray-500 italic">Loading matched opportunities...</p>
+                    </div>
                 </div>
             </div>
         </div>
