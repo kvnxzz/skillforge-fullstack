@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkillForge Live | Unified Portal Terminal</title>
+    <title>SkillForge Live | Portal Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -33,21 +33,39 @@
 </head>
 <body class="antialiased font-sans selection:bg-emerald-500 selection:text-black">
 
-    <!-- Auth Screen -->
-    <div id="login-screen" class="min-h-screen flex items-center justify-center relative overflow-hidden">
-        <div class="glass-card p-8 rounded-2xl w-96 relative z-10 shadow-2xl">
-            <div class="flex justify-center mb-4">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+    <!-- Auth & Role Selection Screen -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center relative overflow-hidden p-4">
+        <div class="glass-card p-8 rounded-2xl w-full max-w-md relative z-10 shadow-2xl space-y-6">
+            <div class="text-center">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> SYSTEM ONLINE
                 </span>
+                <h2 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-500 bg-clip-text text-transparent">SkillForge Live</h2>
+                <p class="text-xs text-gray-400 mt-1">Select your access portal below</p>
             </div>
-            <h2 id="portal-title" class="text-3xl font-extrabold mb-2 text-center tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-500 bg-clip-text text-transparent">SkillForge Live</h2>
-            <p class="text-xs text-gray-400 text-center mb-6">Multi-Role Access Terminal</p>
 
-            <div id="error-msg" class="text-red-400 text-xs hidden mb-4 p-2.5 bg-red-500/10 border border-red-500/20 rounded-lg"></div>
+            <div id="error-msg" class="text-red-400 text-xs hidden p-3 bg-red-500/10 border border-red-500/20 rounded-xl"></div>
 
-            <input type="text" id="auth-token" value="STUDENT123" placeholder="Enter Token (e.g. STUDENT123, ADMIN123, UNIV123)" onkeypress="if(event.key === 'Enter') login()" class="w-full bg-black/80 border border-gray-800 rounded-xl px-4 py-3 mb-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-all">
-            <button onclick="login()" class="w-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-black font-bold py-3 rounded-xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(0,255,136,0.3)]">Authenticate Access &rarr;</button>
+            <!-- Quick Role Selectors / Tokens -->
+            <div class="space-y-3">
+                <div>
+                    <label class="text-[10px] font-mono text-gray-400 uppercase tracking-wider mb-1 block">Authentication Token</label>
+                    <input type="text" id="auth-token" placeholder="Enter Token (e.g. STUDENT123)" onkeypress="if(event.key === 'Enter') login()" class="w-full bg-black/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-all font-mono">
+                </div>
+
+                <button onclick="login()" class="w-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-black font-bold py-3 rounded-xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(0,255,136,0.3)] text-xs uppercase tracking-wider">
+                    Authenticate Token &rarr;
+                </button>
+            </div>
+
+            <div class="border-t border-gray-800/80 pt-4">
+                <p class="text-[10px] text-gray-400 text-center uppercase tracking-wider mb-3">Or choose a quick demo role</p>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="quickLogin('STUDENT123')" class="p-2.5 rounded-xl bg-black/50 border border-gray-800 hover:border-emerald-500/50 text-emerald-400 text-xs font-bold transition">Student</button>
+                    <button onclick="quickLogin('MASTER_ADMIN_TOKEN')" class="p-2.5 rounded-xl bg-black/50 border border-gray-800 hover:border-purple-500/50 text-purple-400 text-xs font-bold transition">Admin</button>
+                    <button onclick="quickLogin('UNIV2026')" class="p-2.5 rounded-xl bg-black/50 border border-gray-800 hover:border-cyan-500/50 text-cyan-400 text-xs font-bold transition">University</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -63,24 +81,22 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2 bg-black/50 p-1.5 rounded-xl border border-gray-800">
-                    <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="px-4 py-2 text-xs font-bold rounded-lg transition bg-emerald-500 text-black">Dashboard</button>
-                    <button onclick="switchTab('jobs')" id="tab-btn-jobs" class="px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white">Jobs & Roles</button>
-                    <button onclick="switchTab('applications')" id="tab-btn-applications" class="px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white">Applications (<span id="app-count-badge">0</span>)</button>
+                    <button onclick="switchStudentTab('dashboard')" id="tab-btn-dashboard" class="px-4 py-2 text-xs font-bold rounded-lg transition bg-emerald-500 text-black">Dashboard</button>
+                    <button onclick="switchStudentTab('jobs')" id="tab-btn-jobs" class="px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white">Jobs & Roles</button>
+                    <button onclick="switchStudentTab('applications')" id="tab-btn-applications" class="px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white">Applications (<span id="app-count-badge">0</span>)</button>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="logout()" class="text-xs bg-gray-900 hover:bg-gray-800 text-red-400 px-3 py-2 rounded-xl border border-gray-800 transition">Logout</button>
-                </div>
+                <button onclick="logout()" class="text-xs bg-gray-900 hover:bg-gray-800 text-red-400 px-3 py-2 rounded-xl border border-gray-800 transition">Logout</button>
             </header>
 
-            <div id="view-dashboard" class="space-y-6">
+            <div id="student-view-dashboard" class="space-y-6">
                 <div class="glass-card p-6 rounded-2xl">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                         <div>
                             <h3 class="text-sm font-bold text-white uppercase tracking-wider">Your Active Skills</h3>
-                            <p class="text-xs text-gray-400">Add or remove skills to update dynamic compatibility with available jobs.</p>
+                            <p class="text-xs text-gray-400">Add or remove skills to update compatibility scores with jobs.</p>
                         </div>
                         <div class="flex gap-2">
-                            <input type="text" id="new-skill-input" placeholder="e.g. Web Development, Python" onkeypress="if(event.key === 'Enter') addSkill()" class="bg-black/60 border border-gray-800 text-xs rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500 min-w-[200px]">
+                            <input type="text" id="new-skill-input" placeholder="e.g. JavaScript, Python" onkeypress="if(event.key === 'Enter') addSkill()" class="bg-black/60 border border-gray-800 text-xs rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500 min-w-[200px]">
                             <button onclick="addSkill()" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 text-xs px-4 py-2 rounded-xl font-bold transition">+ Add Skill</button>
                         </div>
                     </div>
@@ -101,22 +117,20 @@
                     <div class="glass-card p-6 rounded-2xl md:col-span-2">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-sm font-bold text-white uppercase tracking-wider">Top Job Opportunities</h3>
-                            <button onclick="switchTab('jobs')" class="text-xs text-emerald-400 hover:underline font-mono">View All &rarr;</button>
+                            <button onclick="switchStudentTab('jobs')" class="text-xs text-emerald-400 hover:underline font-mono">View All &rarr;</button>
                         </div>
                         <div id="top-job-list" class="space-y-3"></div>
                     </div>
                 </div>
             </div>
 
-            <div id="view-jobs" class="hidden space-y-6">
-                <div class="glass-card p-6 rounded-2xl space-y-4">
-                    <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
-                        <input type="text" id="search-input" onkeyup="filterJobs()" placeholder="Search by title, company, or required skill..." class="w-full md:w-1/2 bg-black/80 border border-gray-800 text-xs rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
-                        <select id="sort-select" onchange="filterJobs()" class="bg-black/80 border border-gray-800 text-xs rounded-xl px-3 py-3 text-gray-300 focus:outline-none">
-                            <option value="match">Sort by Highest Match Score</option>
-                            <option value="title">Sort by Job Title</option>
-                        </select>
-                    </div>
+            <div id="student-view-jobs" class="hidden space-y-6">
+                <div class="glass-card p-6 rounded-2xl flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <input type="text" id="search-input" onkeyup="filterJobs()" placeholder="Search by title, company, or skill..." class="w-full md:w-1/2 bg-black/80 border border-gray-800 text-xs rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
+                    <select id="sort-select" onchange="filterJobs()" class="bg-black/80 border border-gray-800 text-xs rounded-xl px-3 py-3 text-gray-300 focus:outline-none">
+                        <option value="match">Sort by Highest Match Score</option>
+                        <option value="title">Sort by Job Title</option>
+                    </select>
                 </div>
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">All Live Postings</h3>
@@ -124,7 +138,7 @@
                 </div>
             </div>
 
-            <div id="view-applications" class="hidden space-y-6">
+            <div id="student-view-applications" class="hidden space-y-6">
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Submitted Applications</h3>
                     <div id="applications-list" class="space-y-3"></div>
@@ -148,7 +162,6 @@
             </header>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Post Job Form -->
                 <div class="glass-card p-6 rounded-2xl space-y-4">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">Post New Job Role</h3>
                     <input type="text" id="admin-job-title" placeholder="Job Title" class="w-full bg-black/80 border border-gray-800 text-xs rounded-xl p-3 text-white">
@@ -157,7 +170,6 @@
                     <button onclick="postAdminJob()" class="w-full bg-purple-600 text-white font-bold py-2.5 rounded-xl text-xs hover:bg-purple-500 transition">Post Opportunity</button>
                 </div>
 
-                <!-- Broadcast Announcement -->
                 <div class="glass-card p-6 rounded-2xl space-y-4">
                     <h3 class="text-sm font-bold text-white uppercase tracking-wider">Global Socket Broadcast</h3>
                     <textarea id="admin-broadcast-msg" rows="4" placeholder="Enter broadcast message for all connected users..." class="w-full bg-black/80 border border-gray-800 text-xs rounded-xl p-3 text-white"></textarea>
@@ -182,7 +194,10 @@
             </header>
 
             <div class="glass-card p-6 rounded-2xl space-y-4">
-                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Campus Application & Placement Analytics</h3>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Campus Application & Placement Analytics</h3>
+                    <button onclick="fetchUniversityApplications()" class="text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-3 py-1.5 rounded-lg hover:bg-cyan-500/30 transition">Refresh Data</button>
+                </div>
                 <div id="univ-applications-list" class="space-y-3">
                     <p class="text-xs text-gray-500 italic">Loading student applications across all programs...</p>
                 </div>
@@ -190,13 +205,18 @@
         </div>
     </div>
 
-    <!-- Socket.io Script -->
+    <!-- Socket.io & App Script -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
         let currentUser = null;
         let activeJobs = [];
         let submittedApplications = [];
+
+        function quickLogin(tokenValue) {
+            document.getElementById('auth-token').value = tokenValue;
+            login();
+        }
 
         async function login() {
             const token = document.getElementById('auth-token').value.trim();
@@ -254,6 +274,7 @@
             document.getElementById('dashboard-screen-admin').classList.add('hidden');
             document.getElementById('dashboard-screen-university').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('auth-token').value = '';
         }
 
         async function postAdminJob() {
@@ -296,7 +317,7 @@
                 const data = await res.json();
                 const container = document.getElementById('univ-applications-list');
 
-                if (data.success && data.applications.length > 0) {
+                if (data.success && data.applications && data.applications.length > 0) {
                     container.innerHTML = data.applications.map(app => `
                         <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex justify-between items-center">
                             <div>
@@ -309,21 +330,22 @@
                         </div>
                     `).join('');
                 } else {
-                    container.innerHTML = `<p class="text-xs text-gray-500 italic">No applications found.</p>`;
+                    container.innerHTML = `<p class="text-xs text-gray-500 italic">No applications recorded in university database.</p>`;
                 }
             } catch (err) {
-                console.error(err);
+                const container = document.getElementById('univ-applications-list');
+                if (container) container.innerHTML = `<p class="text-xs text-red-400 italic">Failed to fetch applications.</p>`;
             }
         }
 
-        function switchTab(tab) {
+        function switchStudentTab(tab) {
             ['dashboard', 'jobs', 'applications'].forEach(t => {
-                const view = document.getElementById(`view-${t}`);
+                const view = document.getElementById(`student-view-${t}`);
                 if (view) view.classList.add('hidden');
                 const btn = document.getElementById(`tab-btn-${t}`);
                 if (btn) btn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition text-gray-400 hover:text-white';
             });
-            const activeView = document.getElementById(`view-${tab}`);
+            const activeView = document.getElementById(`student-view-${tab}`);
             if (activeView) activeView.classList.remove('hidden');
             const activeBtn = document.getElementById(`tab-btn-${tab}`);
             if (activeBtn) activeBtn.className = 'px-4 py-2 text-xs font-bold rounded-lg transition bg-emerald-500 text-black';
