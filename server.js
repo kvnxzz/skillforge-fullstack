@@ -15,10 +15,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- MongoDB Schemas ---
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.log('MongoDB connection error:', err));
-
 const UserSchema = new mongoose.Schema({
     token: { type: String, required: true, unique: true },
     name: String,
@@ -34,6 +30,40 @@ const SettingsSchema = new mongoose.Schema({
     maintenanceMode: { type: Boolean, default: false }
 });
 const Settings = mongoose.model('Settings', SettingsSchema);
+
+// --- MongoDB Connection & Auto-Seeding ---
+mongoose.connect(process.env.MONGO_URI)
+    .then(async () => {
+        console.log('MongoDB Connected');
+
+        // Auto-create users collection and default tokens if database is empty
+        try {
+            const univExists = await User.findOne({ role: 'university' });
+            if (!univExists) {
+                await User.create({
+                    token: 'UNIV2026',
+                    name: 'State University',
+                    role: 'university',
+                    needs: []
+                });
+                console.log('✅ Auto-seeded University token: UNIV2026');
+            }
+
+            const studentExists = await User.findOne({ role: 'student' });
+            if (!studentExists) {
+                await User.create({
+                    token: 'STUDENT123',
+                    name: 'Alex Student',
+                    role: 'student',
+                    needs: ['Web Development', 'Data Science']
+                });
+                console.log('✅ Auto-seeded Student token: STUDENT123');
+            }
+        } catch (seedErr) {
+            console.error('Auto-seeding error:', seedErr);
+        }
+    })
+    .catch(err => console.log('MongoDB connection error:', err));
 
 // --- API Routes ---
 app.post('/api/auth', async (req, res) => {
