@@ -52,12 +52,22 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> QUANTUM SECURE GATEWAY
                 </span>
                 <h1 class="text-3xl font-black tracking-tight bg-gradient-to-r from-white via-cyan-200 to-emerald-400 bg-clip-text text-transparent">SKILLFORGE LIVE</h1>
-                <p class="text-xs text-gray-400">Next-Gen Academic & Professional Placement Terminal</p>
+                <p class="text-xs text-gray-400">Select Portal Context & Provide Access Token</p>
             </div>
 
             <div id="error-msg" class="hidden text-red-400 text-xs p-3 bg-red-500/10 border border-red-500/30 rounded-xl font-mono"></div>
 
             <div class="space-y-4">
+                <!-- Portal Selection Buttons -->
+                <div>
+                    <label class="text-[10px] font-mono text-cyan-400 uppercase tracking-wider mb-2 block">Select Target Portal</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="selectPortal('student')" id="portal-btn-student" class="p-2.5 rounded-xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-300 text-xs font-bold transition font-mono text-center">Student</button>
+                        <button type="button" onclick="selectPortal('university')" id="portal-btn-university" class="p-2.5 rounded-xl border border-gray-800 bg-black/60 text-gray-400 text-xs font-bold transition font-mono text-center hover:border-cyan-500/40">University</button>
+                        <button type="button" onclick="selectPortal('admin')" id="portal-btn-admin" class="p-2.5 rounded-xl border border-gray-800 bg-black/60 text-gray-400 text-xs font-bold transition font-mono text-center hover:border-purple-500/40">Admin</button>
+                    </div>
+                </div>
+
                 <div>
                     <label class="text-[10px] font-mono text-cyan-400 uppercase tracking-wider mb-1.5 block">Access Clearance Token</label>
                     <div class="relative">
@@ -249,6 +259,21 @@
         let currentUser = null;
         let activeJobs = [];
         let submittedApplications = [];
+        let selectedRoleContext = 'student'; // Default portal choice
+
+        function selectPortal(role) {
+            selectedRoleContext = role;
+            ['student', 'university', 'admin'].forEach(r => {
+                const btn = document.getElementById(`portal-btn-${r}`);
+                if (r === role) {
+                    if (r === 'student') btn.className = 'p-2.5 rounded-xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-300 text-xs font-bold transition font-mono text-center';
+                    else if (r === 'university') btn.className = 'p-2.5 rounded-xl border border-cyan-500/50 bg-cyan-500/10 text-cyan-300 text-xs font-bold transition font-mono text-center';
+                    else if (r === 'admin') btn.className = 'p-2.5 rounded-xl border border-purple-500/50 bg-purple-500/10 text-purple-300 text-xs font-bold transition font-mono text-center';
+                } else {
+                    btn.className = 'p-2.5 rounded-xl border border-gray-800 bg-black/60 text-gray-400 text-xs font-bold transition font-mono text-center hover:border-gray-600';
+                }
+            });
+        }
 
         socket.on('new_job_posted', (job) => {
             fetchJobs();
@@ -308,12 +333,12 @@
                 const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token })
+                    body: JSON.stringify({ token, role: selectedRoleContext })
                 });
                 const data = await res.json();
 
                 if (data.success) {
-                    currentUser = data.data || { name: data.name, role: data.role, token };
+                    currentUser = data.data || { name: data.name, role: data.role || selectedRoleContext, token };
                     if (!currentUser.needs) currentUser.needs = [];
 
                     document.getElementById('login-screen').classList.add('hidden');
