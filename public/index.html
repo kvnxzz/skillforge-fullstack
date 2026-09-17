@@ -74,22 +74,6 @@
                 <button onclick="login()" class="w-full bg-gradient-to-r from-cyan-500 to-emerald-400 text-black font-black py-3.5 rounded-xl hover:opacity-90 transition shadow-[0_0_25px_rgba(0,240,255,0.3)] text-xs uppercase tracking-widest">
                     Initialize Neural Link &rarr;
                 </button>
-
-                <!-- ROLE SELECTION / DEMO OPTIONS -->
-                <div class="pt-2 border-t border-gray-800/80 space-y-2">
-                    <span class="text-[10px] font-mono text-gray-400 uppercase tracking-wider block text-center">Quick Role Access Options</span>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button onclick="selectDemoRole('student')" class="py-2 px-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-[10px] font-mono transition font-bold uppercase tracking-wider">
-                            Student
-                        </button>
-                        <button onclick="selectDemoRole('university')" class="py-2 px-2 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-xl text-[10px] font-mono transition font-bold uppercase tracking-wider">
-                            University
-                        </button>
-                        <button onclick="selectDemoRole('admin')" class="py-2 px-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-xl text-[10px] font-mono transition font-bold uppercase tracking-wider">
-                            Admin
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -309,15 +293,6 @@
             }
         }
 
-        // --- CORRECTED DEMO ROLE TOKENS ---
-        function selectDemoRole(role) {
-            const tokenInput = document.getElementById('auth-token');
-            if (role === 'student') tokenInput.value = 'STUDENT123';
-            else if (role === 'university') tokenInput.value = 'UNIV2026';
-            else if (role === 'admin') tokenInput.value = 'ADMIN123';
-            login();
-        }
-
         async function login() {
             const token = document.getElementById('auth-token').value.trim();
             const errBox = document.getElementById('error-msg');
@@ -501,19 +476,23 @@
             const targetJob = activeJobs.find(j => j._id === jobId);
             const matchScore = targetJob ? targetJob.matchScore : 0;
 
-            const res = await fetch('/api/applications', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    jobId, 
-                    studentName: currentUser.name, 
-                    studentEmail: email, 
-                    studentSkills: currentUser.needs,
-                    matchScore: matchScore 
-                })
-            });
-            const data = await res.json();
-            if (data.success) fetchApplications();
+            try {
+                const res = await fetch('/api/applications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        jobId, 
+                        studentName: currentUser.name, 
+                        studentEmail: email, 
+                        studentSkills: currentUser.needs,
+                        matchScore: matchScore 
+                    })
+                });
+                const data = await res.json();
+                if (data.success) fetchApplications();
+            } catch (e) {
+                console.error("Application dispatch error:", e);
+            }
         }
 
         async function fetchApplications() {
@@ -528,8 +507,8 @@
                 container.innerHTML = submittedApplications.map(app => `
                     <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex justify-between items-center">
                         <div>
-                            <h4 class="font-bold text-white text-sm">${app.jobId?.title || 'Position'}</h4>
-                            <p class="text-xs text-gray-400">${app.jobId?.company || 'Company'} &bull; Match: ${app.matchScore}%</p>
+                            <h4 class="font-bold text-white text-sm">${(typeof app.jobId === 'object' && app.jobId?.title) ? app.jobId.title : (app.jobTitle || 'Position')}</h4>
+                            <p class="text-xs text-gray-400">${(typeof app.jobId === 'object' && app.jobId?.company) ? app.jobId.company : (app.company || 'Company')} &bull; Match: ${app.matchScore}%</p>
                         </div>
                         <span class="text-xs font-mono px-3 py-1 rounded-full ${app.status === 'Shortlisted' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30'}">${app.status}</span>
                     </div>
@@ -556,10 +535,10 @@
                 
                 if (data.success && data.applications && data.applications.length > 0) {
                     container.innerHTML = data.applications.map(app => {
-                        const skillsArray = app.skills || app.studentSkills || [];
+                        const skillsArray = app.studentSkills || app.skills || [];
                         const displayMatch = app.matchScore !== undefined ? app.matchScore : 0;
-                        const jobTitle = app.jobId?.title || app.jobTitle || 'Position';
-                        const jobCompany = app.jobId?.company || app.company || 'N/A';
+                        const jobTitle = (typeof app.jobId === 'object' && app.jobId?.title) ? app.jobId.title : (app.jobTitle || 'Position');
+                        const jobCompany = (typeof app.jobId === 'object' && app.jobId?.company) ? app.jobId.company : (app.company || 'N/A');
                         const studentName = app.studentName || 'Unknown Student';
                         const studentEmail = app.studentEmail || 'No email provided';
 
@@ -588,7 +567,7 @@
                 }
             } catch (err) {
                 console.error("Error fetching university applications:", err);
-                document.getElementById('univ-applications-list').innerHTML = `<p class="text-xs text-red-400 italic">Failed to synchronize application stream.</p>`;
+                container.innerHTML = `<p class="text-xs text-red-400 italic">Failed to synchronize application stream.</p>`;
             }
         }
 
