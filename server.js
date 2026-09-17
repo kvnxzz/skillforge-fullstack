@@ -40,6 +40,36 @@ const JobSchema = new mongoose.Schema({
 });
 const Job = mongoose.model('Job', JobSchema);
 
+// Application Schema
+const ApplicationSchema = new mongoose.Schema({
+    jobId: { type: mongoose.Schema.Types.ObjectId, ref: 'Job', required: true },
+    studentName: { type: String, required: true },
+    studentEmail: { type: String, required: true },
+    skills: [String],
+    matchScore: { type: Number, default: 0 },
+    status: { type: String, default: 'Pending' }, // Pending, Shortlisted, Rejected
+    appliedAt: { type: Date, default: Date.now }
+});
+const Application = mongoose.model('Application', ApplicationSchema);
+
+// --- Skill Matching Algorithm Helper ---
+function calculateMatch(studentSkills, requiredSkillString) {
+    if (!studentSkills || !studentSkills.length || !requiredSkillString) return 0;
+    
+    // Normalize student skills
+    const studentSet = new Set(studentSkills.map(s => s.toLowerCase().trim()));
+    
+    // Parse and normalize required skills (handles comma-separated strings)
+    const requiredSkills = requiredSkillString.split(',').map(s => s.toLowerCase().trim());
+    
+    let matches = 0;
+    requiredSkills.forEach(skill => {
+        if (studentSet.has(skill)) matches++;
+    });
+    
+    return Math.round((matches / requiredSkills.length) * 100);
+}
+
 // --- MongoDB Connection & Auto-Seeding ---
 mongoose.connect(process.env.MONGO_URI)
     .then(async () => {
@@ -167,6 +197,64 @@ app.delete('/api/jobs/:id', async (req, res) => {
         res.json({ success: true, message: 'Opportunity deleted successfully', id });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to delete job posting' });
+    }
+});
+
+// --- Application Tracking & Skill Matching Routes ---
+
+// Submit Job Application with Dynamic Match Score
+app.post('/api/applications', async (req, res) => {
+    try {
+        const { jobId, studentName, studentEmail, studentSkills } = req.body;
+        
+        const job = await Job.findById(jobId);
+        if (!job) return res.status(404).json({ success: false, message: 'Job posting not found' });
+
+        const matchScore = calculateMatch(studentSkills, job.skillRequired);
+
+        const application = await Application.create({
+            jobId,
+            studentName,
+            studentEmail,
+            skills: studentSkills,
+            matchScore
+        });
+
+        // Broadcast real-time application alert
+        io.emit('new_application', application);
+
+        res.json({ success: true, application });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to submit application' });
+    }
+});
+
+// Fetch Applications by Student Email
+app.get('/api/applications/:email', async (req, res) => {
+    try {
+        const applications = await Application.find({ studentEmail: req.params.email })
+            .populate('jobId')
+            .sort({ appliedAt: -1 });
+            
+        res.json({ success: true, applications });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to fetch application records' });
+    }
+});
+
+// --- Admin System Analytics Route ---
+app.get('/api/admin/stats', async (req, res) => {
+    try {
+        const totalJobs = await Job.countDocuments();
+        const totalApps = await Application.countDocuments();
+        const totalUsers = await User.countDocuments();
+        
+        res.json({ 
+            success: true, 
+            stats: { totalJobs, totalApps, totalUsers } 
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to compile admin metrics' });
     }
 });
 
