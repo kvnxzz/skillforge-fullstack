@@ -80,6 +80,13 @@ mongoose.connect(process.env.MONGO_URI)
                 ]);
                 console.log('✅ Auto-seeded initial job opportunities into MongoDB');
             }
+
+            // Seed Default Global Settings
+            let settingsExists = await Settings.findOne({ id: 'global' });
+            if (!settingsExists) {
+                await Settings.create({ id: 'global', portalName: 'SkillForge Live', maintenanceMode: false });
+                console.log('✅ Auto-seeded Global Settings in MongoDB');
+            }
         } catch (seedErr) {
             console.error('Auto-seeding error:', seedErr);
         }
@@ -144,16 +151,54 @@ app.post('/api/jobs', async (req, res) => {
     }
 });
 
-// Global Settings
+// Delete a Job Opportunity (University / Admin)
+app.delete('/api/jobs/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedJob = await Job.findByIdAndDelete(id);
+
+        if (!deletedJob) {
+            return res.status(404).json({ success: false, message: 'Job opportunity not found' });
+        }
+
+        // Broadcast removal event across WebSockets
+        io.emit('job_deleted', id);
+
+        res.json({ success: true, message: 'Opportunity deleted successfully', id });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to delete job posting' });
+    }
+});
+
+// Fetch Global Settings
 app.get('/api/settings', async (req, res) => {
     try {
         let settings = await Settings.findOne({ id: 'global' });
         if (!settings) {
-            settings = await Settings.create({});
+            settings = await Settings.create({ id: 'global', portalName: 'SkillForge Live', maintenanceMode: false });
         }
-        res.json(settings);
+        res.json({ success: true, settings });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch settings' });
+        res.status(500).json({ success: false, message: 'Failed to fetch settings' });
+    }
+});
+
+// Update Global Settings (REST API Alternative)
+app.put('/api/settings', async (req, res) => {
+    try {
+        const { portalName, maintenanceMode } = req.body;
+        const updatedSettings = await Settings.findOneAndUpdate(
+            { id: 'global' },
+            { portalName, maintenanceMode },
+            { new: true, upsert: true }
+        );
+
+        // Broadcast settings change live to all clients
+        io.emit('settings_updated', updatedSettings);
+
+        res.json({ success: true, settings: updatedSettings });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to update global settings' });
     }
 });
 
@@ -174,10 +219,14 @@ io.on('connection', (socket) => {
 
     socket.on('admin_update_settings', async (newSettings) => {
         try {
-            await Settings.findOneAndUpdate({ id: 'global' }, newSettings, { upsert: true });
-            io.emit('settings_updated', newSettings);
+            const updated = await Settings.findOneAndUpdate(
+                { id: 'global' },
+                { portalName: newSettings.portalName, maintenanceMode: newSettings.maintenanceMode },
+                { new: true, upsert: true }
+            );
+            io.emit('settings_updated', updated);
         } catch (err) {
-            console.error('Error updating settings:', err);
+            console.error('Error updating settings via socket:', err);
         }
     });
 
