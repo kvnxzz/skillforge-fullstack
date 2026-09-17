@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>SkillForge Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <style> body { background-color: #000; color: #fff; } </style>
+</head>
+<body class="antialiased font-sans">
+    
+    <!-- Login Screen -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center">
+        <div class="bg-gray-900 border border-gray-800 p-8 rounded-xl w-96 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+            <h2 id="portal-title" class="text-2xl font-bold mb-6 text-center">SkillForge Access</h2>
+            <div id="error-msg" class="text-red-500 text-sm hidden mb-4"></div>
+            <input type="text" id="auth-token" placeholder="Enter Secure Token" class="w-full bg-black border border-gray-700 rounded px-4 py-2 mb-4 text-white">
+            <button onclick="login()" class="w-full bg-white text-black font-semibold py-2 rounded hover:bg-gray-200 transition">Authenticate</button>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="hidden min-h-screen p-8">
+        <div class="max-w-4xl mx-auto">
+            <header class="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
+                <h1 id="dash-title" class="text-2xl font-bold">Dashboard</h1>
+                <span id="user-greeting" class="text-emerald-400"></span>
+            </header>
+            
+            <div id="broadcast-alert" class="hidden bg-emerald-500/20 border border-emerald-500 p-4 rounded mb-6 text-emerald-300"></div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl">
+                    <h3 class="text-lg mb-2">My Modules</h3>
+                    <p class="text-gray-400 text-sm">System synced and active.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

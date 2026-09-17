@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>Master Control - SkillForge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style> body { background-color: #000; color: #fff; } </style>
+</head>
+<body class="antialiased p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-emerald-500">Master Control Panel</h1>
+        
+        <div class="grid grid-cols-2 gap-8">
+            <!-- Live Editing Engine -->
+            <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl">
+                <h2 class="text-xl mb-4 border-b border-gray-700 pb-2">Live Editing Engine</h2>
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-400 mb-1">Global Portal Name</label>
+                    <input type="text" id="portal-name-input" class="w-full bg-black border border-gray-700 rounded px-3 py-2">
+                </div>
+                <div class="mb-4">
+                    <label class="flex items-center space-x-2 text-sm text-gray-400">
+                        <input type="checkbox" id="maintenance-toggle" class="form-checkbox bg-black border-gray-700">
+                        <span>Enable Maintenance Mode</span>
+                    </label>
+                </div>
+                <button onclick="updateSettings()" class="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-500">Push Live Update</button>
+
+                <hr class="border-gray-700 my-6">
+
+                <h2 class="text-xl mb-4">Broadcast System</h2>
+                <input type="text" id="broadcast-msg" placeholder="Message to all users..." class="w-full bg-black border border-gray-700 rounded px-3 py-2 mb-2">
+                <button onclick="sendBroadcast()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Broadcast Now</button>
+            </div>
+
+            <!-- Live Monitoring -->
+            <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl">
+                <h2 class="text-xl mb-4 border-b border-gray-700 pb-2">Live Active Users <span id="user-count" class="text-emerald-500 text-sm ml-2">(0)</span></h2>
+                <ul id="active-users-list" class="space-y-2 text-sm">
+                    <li class="text-gray-500 italic">Waiting for telemetry...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Note: In a real app, protect this page with middleware.
+        // For MVP, if they land here without the token, they won't trigger Socket connections properly.
+        const socket = io();
+
+        // Load current settings
+        fetch('/api/settings').then(res => res.json()).then(data => {
+            document.getElementById('portal-name-input').value = data.portalName;
+            document.getElementById('maintenance-toggle').checked = data.maintenanceMode;
+        });
+
+        function updateSettings() {
+            const portalName = document.getElementById('portal-name-input').value;
+            const maintenanceMode = document.getElementById('maintenance-toggle').checked;
+            socket.emit('admin_update_settings', { portalName, maintenanceMode });
+            alert('Updates pushed to all live clients!');
+        }
+
+        function sendBroadcast() {
+            const msg = document.getElementById('broadcast-msg').value;
+            socket.emit('admin_broadcast', msg);
+            document.getElementById('broadcast-msg').value = '';
+        }
+
+        // Listen for live user updates
+        socket.on('admin_update_users', (users) => {
+            document.getElementById('user-count').innerText = `(${users.length})`;
+            const list = document.getElementById('active-users-list');
+            list.innerHTML = '';
+            
+            if (users.length === 0) {
+                list.innerHTML = '<li class="text-gray-500 italic">No active sessions.</li>';
+                return;
+            }
+
+            users.forEach(u => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center bg-black p-3 rounded border border-gray-800';
+                li.innerHTML = `
+                    <div><span class="font-bold text-white">${u.name}</span> <span class="text-xs text-gray-500 ml-2">(${u.role})</span></div>
+                    <span class="text-xs text-emerald-400">● Online</span>
+                `;
+                list.appendChild(li);
+            });
+        });
+    </script>
+</body>
+</html>
