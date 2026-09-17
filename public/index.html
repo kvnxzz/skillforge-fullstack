@@ -14,8 +14,19 @@
         <div class="bg-gray-900 border border-gray-800 p-8 rounded-xl w-96 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
             <h2 id="portal-title" class="text-2xl font-bold mb-6 text-center">SkillForge Access</h2>
             <div id="error-msg" class="text-red-500 text-sm hidden mb-4"></div>
-            <input type="text" id="auth-token" placeholder="Enter Secure Token" class="w-full bg-black border border-gray-700 rounded px-4 py-2 mb-4 text-white">
-            <button onclick="login()" class="w-full bg-white text-black font-semibold py-2 rounded hover:bg-gray-200 transition">Authenticate</button>
+            <input type="text" id="auth-token" placeholder="Enter Secure Token" class="w-full bg-black border border-gray-700 rounded px-4 py-2 mb-4 text-white focus:outline-none focus:border-emerald-500">
+            <button onclick="login()" class="w-full bg-white text-black font-semibold py-2 rounded hover:bg-gray-200 transition mb-6">Authenticate</button>
+            
+            <!-- Portal Navigation Links -->
+            <div class="pt-4 border-t border-gray-800 text-center space-y-2">
+                <p class="text-xs text-gray-500 mb-2">Select Portal Mode</p>
+                <a href="/university.html" class="block w-full py-2 bg-gray-800 hover:bg-gray-700 text-emerald-400 text-sm font-medium rounded transition">
+                    University Portal &rarr;
+                </a>
+                <a href="/admin.html" class="block text-xs text-gray-400 hover:text-white pt-1 transition">
+                    Master Control Panel
+                </a>
+            </div>
         </div>
     </div>
 
@@ -24,7 +35,12 @@
         <div class="max-w-4xl mx-auto">
             <header class="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
                 <h1 id="dash-title" class="text-2xl font-bold">Dashboard</h1>
-                <span id="user-greeting" class="text-emerald-400"></span>
+                <div class="flex items-center gap-4">
+                    <a href="/university.html" class="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1.5 text-emerald-400 rounded transition">
+                        University Portal
+                    </a>
+                    <span id="user-greeting" class="text-emerald-400 font-medium"></span>
+                </div>
             </header>
             
             <div id="broadcast-alert" class="hidden bg-emerald-500/20 border border-emerald-500 p-4 rounded mb-6 text-emerald-300"></div>
