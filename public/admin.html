@@ -2,92 +2,180 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <title>Master Control - SkillForge</title>
+    <title>SkillForge | Master Control Node</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style> body { background-color: #000; color: #fff; } </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        neon: { green: '#00ff88', cyan: '#00f0ff', purple: '#7000ff' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: #050505; color: #fff; }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card:hover {
+            border-color: rgba(112, 0, 255, 0.4);
+            box-shadow: 0 0 25px -5px rgba(112, 0, 255, 0.2);
+        }
+    </style>
 </head>
-<body class="antialiased p-8">
-    <div class="max-w-6xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8 text-emerald-500">Master Control Panel</h1>
-        
-        <div class="grid grid-cols-2 gap-8">
-            <!-- Live Editing Engine -->
-            <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl">
-                <h2 class="text-xl mb-4 border-b border-gray-700 pb-2">Live Editing Engine</h2>
-                <div class="mb-4">
-                    <label class="block text-sm text-gray-400 mb-1">Global Portal Name</label>
-                    <input type="text" id="portal-name-input" class="w-full bg-black border border-gray-700 rounded px-3 py-2">
-                </div>
-                <div class="mb-4">
-                    <label class="flex items-center space-x-2 text-sm text-gray-400">
-                        <input type="checkbox" id="maintenance-toggle" class="form-checkbox bg-black border-gray-700">
-                        <span>Enable Maintenance Mode</span>
-                    </label>
-                </div>
-                <button onclick="updateSettings()" class="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-500">Push Live Update</button>
+<body class="antialiased font-sans selection:bg-purple-500 selection:text-white">
 
-                <hr class="border-gray-700 my-6">
+    <!-- Login Screen -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div class="absolute w-96 h-96 bg-purple-600/10 rounded-full blur-3xl -top-20 -left-20"></div>
 
-                <h2 class="text-xl mb-4">Broadcast System</h2>
-                <input type="text" id="broadcast-msg" placeholder="Message to all users..." class="w-full bg-black border border-gray-700 rounded px-3 py-2 mb-2">
-                <button onclick="sendBroadcast()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Broadcast Now</button>
+        <div class="glass-card p-8 rounded-2xl w-96 relative z-10 shadow-2xl">
+            <div class="flex justify-center mb-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-widest bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                    MASTER TERMINAL
+                </span>
+            </div>
+            <h2 class="text-2xl font-extrabold mb-2 text-center text-white">System Admin</h2>
+            <p class="text-xs text-gray-400 text-center mb-6">Master Access Key Required</p>
+
+            <div id="error-msg" class="text-red-400 text-xs hidden mb-4 p-2.5 bg-red-500/10 border border-red-500/20 rounded-lg"></div>
+
+            <input type="password" id="auth-token" placeholder="Enter Master Admin Token" onkeypress="if(event.key === 'Enter') adminLogin()" class="w-full bg-black/80 border border-gray-800 rounded-xl px-4 py-3 mb-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-all">
+            <button onclick="adminLogin()" class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold py-3 rounded-xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(112,0,255,0.3)]">Access Terminal &rarr;</button>
+
+            <div class="pt-6 mt-6 border-t border-gray-800/80 text-center space-y-2">
+                <a href="/index.html" class="block w-full py-2.5 bg-gray-900/80 hover:bg-gray-800 text-purple-400 text-xs font-semibold rounded-xl border border-gray-800 transition">&larr; Return to Student Portal</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard Screen -->
+    <div id="dashboard-screen" class="hidden min-h-screen p-6 md:p-12">
+        <div class="max-w-6xl mx-auto space-y-8">
+            
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl border-purple-500/20">
+                <div>
+                    <span class="text-[10px] font-mono tracking-widest text-purple-400 uppercase">Superuser Access</span>
+                    <h1 class="text-2xl font-black text-white tracking-tight">Master System Control</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs bg-black/60 border border-purple-500/30 text-purple-400 font-mono">
+                        <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span> SOCKET ENGINE ACTIVE
+                    </span>
+                    <a href="/index.html" class="text-xs bg-gray-800 hover:bg-gray-700 px-4 py-2 text-gray-300 font-medium rounded-xl border border-gray-700 transition">Exit Terminal</a>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- System Broadcast Panel -->
+                <div class="glass-card p-6 rounded-2xl space-y-4 md:col-span-1">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Live System Broadcast</h3>
+                    <p class="text-xs text-gray-400">Push real-time banner updates directly to all active user dashboards over WebSockets.</p>
+
+                    <div class="space-y-3">
+                        <textarea id="broadcast-msg" rows="3" placeholder="Type alert message..." class="w-full bg-black/80 border border-gray-800 rounded-xl p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 resize-none"></textarea>
+                        <button onclick="sendBroadcast()" class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs hover:opacity-90 transition">
+                            📢 Broadcast to Active Nodes
+                        </button>
+                    </div>
+
+                    <div id="broadcast-status" class="hidden text-[11px] p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"></div>
+                </div>
+
+                <!-- Active Sessions Monitor -->
+                <div class="glass-card p-6 rounded-2xl md:col-span-2">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider">Active WebSocket Sessions</h3>
+                            <p class="text-xs text-gray-400">Connected users emitting telemetry</p>
+                        </div>
+                        <span id="active-count" class="text-xs font-mono font-bold bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30">0 Online</span>
+                    </div>
+
+                    <div id="user-list" class="space-y-2 max-h-[350px] overflow-y-auto">
+                        <p class="text-xs text-gray-500 italic p-4 text-center">No active users connected.</p>
+                    </div>
+                </div>
             </div>
 
-            <!-- Live Monitoring -->
-            <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl">
-                <h2 class="text-xl mb-4 border-b border-gray-700 pb-2">Live Active Users <span id="user-count" class="text-emerald-500 text-sm ml-2">(0)</span></h2>
-                <ul id="active-users-list" class="space-y-2 text-sm">
-                    <li class="text-gray-500 italic">Waiting for telemetry...</li>
-                </ul>
-            </div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // Note: In a real app, protect this page with middleware.
-        // For MVP, if they land here without the token, they won't trigger Socket connections properly.
         const socket = io();
 
-        // Load current settings
-        fetch('/api/settings').then(res => res.json()).then(data => {
-            document.getElementById('portal-name-input').value = data.portalName;
-            document.getElementById('maintenance-toggle').checked = data.maintenanceMode;
-        });
+        async function adminLogin() {
+            const token = document.getElementById('auth-token').value;
+            const errBox = document.getElementById('error-msg');
+            errBox.classList.add('hidden');
 
-        function updateSettings() {
-            const portalName = document.getElementById('portal-name-input').value;
-            const maintenanceMode = document.getElementById('maintenance-toggle').checked;
-            socket.emit('admin_update_settings', { portalName, maintenanceMode });
-            alert('Updates pushed to all live clients!');
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+
+                const data = await res.json();
+                if (data.success && data.role === 'admin') {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('dashboard-screen').classList.remove('hidden');
+                } else {
+                    errBox.innerText = 'Invalid Admin Security Token.';
+                    errBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                errBox.innerText = 'Authentication server unreachable.';
+                errBox.classList.remove('hidden');
+            }
         }
 
         function sendBroadcast() {
-            const msg = document.getElementById('broadcast-msg').value;
-            socket.emit('admin_broadcast', msg);
-            document.getElementById('broadcast-msg').value = '';
+            const msgInput = document.getElementById('broadcast-msg');
+            const msg = msgInput.value.trim();
+            if (msg) {
+                socket.emit('admin_broadcast', msg);
+                const statusBox = document.getElementById('broadcast-status');
+                statusBox.innerText = '✅ Broadcast emitted to socket cluster!';
+                statusBox.classList.remove('hidden');
+                msgInput.value = '';
+
+                setTimeout(() => statusBox.classList.add('hidden'), 4000);
+            }
         }
 
-        // Listen for live user updates
+        // Live updating active connected users via Socket.io
         socket.on('admin_update_users', (users) => {
-            document.getElementById('user-count').innerText = `(${users.length})`;
-            const list = document.getElementById('active-users-list');
-            list.innerHTML = '';
-            
-            if (users.length === 0) {
-                list.innerHTML = '<li class="text-gray-500 italic">No active sessions.</li>';
-                return;
-            }
+            const userListEl = document.getElementById('user-list');
+            const countEl = document.getElementById('active-count');
 
-            users.forEach(u => {
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-black p-3 rounded border border-gray-800';
-                li.innerHTML = `
-                    <div><span class="font-bold text-white">${u.name}</span> <span class="text-xs text-gray-500 ml-2">(${u.role})</span></div>
-                    <span class="text-xs text-emerald-400">● Online</span>
-                `;
-                list.appendChild(li);
-            });
+            countEl.innerText = `${users.length} Active`;
+
+            if (users.length > 0) {
+                userListEl.innerHTML = users.map(user => `
+                    <div class="p-3 bg-black/60 rounded-xl border border-gray-800 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <div>
+                                <h4 class="font-bold text-white text-xs">${user.name}</h4>
+                                <p class="text-[10px] text-gray-500 font-mono">Session standard node</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-mono uppercase bg-purple-500/10 text-purple-300 border border-purple-500/30 px-2.5 py-1 rounded-lg">
+                            ${user.role}
+                        </span>
+                    </div>
+                `).join('');
+            } else {
+                userListEl.innerHTML = `<p class="text-xs text-gray-500 italic p-4 text-center">No active users connected.</p>`;
+            }
         });
     </script>
 </body>
