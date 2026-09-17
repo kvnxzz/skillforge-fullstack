@@ -1,16 +1,185 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SkillForge - University Portal</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <title>SkillForge | University Control Node</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        neon: { green: '#00ff88', cyan: '#00f0ff' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: #050505; color: #fff; }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card:hover {
+            border-color: rgba(0, 240, 255, 0.3);
+            box-shadow: 0 0 25px -5px rgba(0, 240, 255, 0.15);
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center">
-  <div class="max-w-md w-full p-6 bg-slate-800 rounded-lg shadow-lg">
-    <h1 class="text-2xl font-bold text-indigo-400 mb-4">University Portal</h1>
-    <p class="text-slate-300 mb-6">Welcome to the SkillForge University Portal.</p>
-    <a href="/index.html" class="text-indigo-400 hover:underline">← Back to Main Login</a>
-  </div>
+<body class="antialiased font-sans selection:bg-cyan-500 selection:text-black">
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div class="absolute w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl -top-20 -right-20"></div>
+
+        <div class="glass-card p-8 rounded-2xl w-96 relative z-10 shadow-2xl">
+            <div class="flex justify-center mb-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                    UNIVERSITY PORTAL NODE
+                </span>
+            </div>
+            <h2 class="text-2xl font-extrabold mb-2 text-center text-white">University Portal</h2>
+            <p class="text-xs text-gray-400 text-center mb-6">Authenticate using your institution token</p>
+
+            <div id="error-msg" class="text-red-400 text-xs hidden mb-4 p-2.5 bg-red-500/10 border border-red-500/20 rounded-lg"></div>
+
+            <input type="text" id="auth-token" placeholder="Enter University Token (UNIV2026)" class="w-full bg-black/80 border border-gray-800 rounded-xl px-4 py-3 mb-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 transition-all">
+            <button onclick="univLogin()" class="w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-bold py-3 rounded-xl hover:opacity-90 transition-all shadow-[0_0_20px_rgba(0,240,255,0.3)]">Authenticate Portal &rarr;</button>
+
+            <div class="pt-6 mt-6 border-t border-gray-800/80 text-center space-y-2">
+                <a href="/index.html" class="block w-full py-2.5 bg-gray-900/80 hover:bg-gray-800 text-emerald-400 text-xs font-semibold rounded-xl border border-gray-800 transition">&larr; Return to Student Portal</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="hidden min-h-screen p-6 md:p-12">
+        <div class="max-w-5xl mx-auto space-y-8">
+            
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl">
+                <div>
+                    <span class="text-[10px] font-mono tracking-widest text-cyan-400 uppercase">Institutional Node</span>
+                    <h1 id="univ-name" class="text-2xl font-black text-white tracking-tight">University Control Center</h1>
+                </div>
+                <a href="/index.html" class="text-xs bg-gray-800 hover:bg-gray-700 px-4 py-2 text-emerald-400 font-medium rounded-xl border border-gray-700 transition">Student Mode</a>
+            </header>
+
+            <div id="status-msg" class="hidden glass-card border-cyan-500/50 p-4 rounded-xl text-cyan-300 text-sm"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Job Posting Form -->
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Post New Opportunity</h3>
+                    <p class="text-xs text-gray-400">Broadcast job opportunities directly to students with matching skills.</p>
+
+                    <form id="job-form" onsubmit="postJob(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-mono text-gray-400 mb-1">JOB TITLE</label>
+                            <input type="text" id="job-title" required placeholder="e.g. AI Research Intern" class="w-full bg-black/80 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-gray-400 mb-1">COMPANY / DEPARTMENT</label>
+                            <input type="text" id="job-company" required placeholder="e.g. State Univ AI Lab" class="w-full bg-black/80 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-mono text-gray-400 mb-1">REQUIRED SKILL VECTOR</label>
+                            <input type="text" id="job-skill" required placeholder="e.g. Web Development, Data Science" class="w-full bg-black/80 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-bold py-2.5 rounded-xl text-xs hover:opacity-90 transition">
+                            Publish Opportunity to MongoDB &rarr;
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Live Posted Opportunities -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Active Database Opportunities</h3>
+                    <div id="posted-jobs-list" class="space-y-3 max-h-[350px] overflow-y-auto">
+                        <p class="text-xs text-gray-500 italic">Fetching live job postings...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        async function univLogin() {
+            const token = document.getElementById('auth-token').value;
+            const errBox = document.getElementById('error-msg');
+            errBox.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+
+                const data = await res.json();
+                if (data.success && data.role === 'university') {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('dashboard-screen').classList.remove('hidden');
+                    document.getElementById('univ-name').innerText = data.name;
+                    loadJobs();
+                } else {
+                    errBox.innerText = 'Invalid University Token. Use UNIV2026.';
+                    errBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                errBox.innerText = 'Authentication error.';
+                errBox.classList.remove('hidden');
+            }
+        }
+
+        async function loadJobs() {
+            const res = await fetch('/api/jobs');
+            const data = await res.json();
+            if (data.success) {
+                const container = document.getElementById('posted-jobs-list');
+                container.innerHTML = data.jobs.map(job => `
+                    <div class="p-3 bg-black/60 rounded-xl border border-gray-800/80 flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold text-white text-xs">${job.title}</h4>
+                            <p class="text-[11px] text-gray-400">${job.company}</p>
+                        </div>
+                        <span class="text-[10px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2.5 py-1 rounded-lg">
+                            ${job.skillRequired}
+                        </span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function postJob(e) {
+            e.preventDefault();
+            const title = document.getElementById('job-title').value;
+            const company = document.getElementById('job-company').value;
+            const skillRequired = document.getElementById('job-skill').value;
+
+            const res = await fetch('/api/jobs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, company, skillRequired })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                const statusBox = document.getElementById('status-msg');
+                statusBox.innerText = `✅ Opportunity "${title}" published and broadcast live to student dashboards!`;
+                statusBox.classList.remove('hidden');
+                document.getElementById('job-form').reset();
+                loadJobs();
+            }
+        }
+
+        socket.on('new_job_posted', () => loadJobs());
+    </script>
 </body>
 </html>
