@@ -568,29 +568,15 @@
                     <div class="p-4 bg-black/60 rounded-xl border border-gray-800 flex justify-between items-center">
                         <div>
                             <h4 class="font-bold text-white text-sm">${job.title || 'Position'}</h4>
-                            <p class="text-xs text-gray-400">${job.company || 'Company'} &bull; Status: <span class="text-emerald-400 font-semibold">${app.status || 'Submitted'}</span></p>
+                            <p class="text-xs text-gray-400">${job.company || 'Company'} &bull; Match: ${app.matchScore || 0}%</p>
                         </div>
                         <span class="text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full">
-                            Match Score: ${app.matchScore || 0}%
+                            Submitted
                         </span>
                     </div>
                 `;
             }).join('');
         }
-
-        socket.on('new_job_posted', (newJob) => {
-            activeJobs.unshift(newJob);
-            computeMatches();
-        });
-
-        socket.on('job_deleted', (deletedId) => {
-            activeJobs = activeJobs.filter(j => j._id !== deletedId);
-            computeMatches();
-        });
-
-        socket.on('broadcast', (msg) => {
-            alert(`[System Broadcast]: ${msg}`);
-        });
     </script>
 </body>
 </html>
