@@ -309,11 +309,12 @@
             }
         }
 
+        // --- CORRECTED DEMO ROLE TOKENS ---
         function selectDemoRole(role) {
             const tokenInput = document.getElementById('auth-token');
-            if (role === 'student') tokenInput.value = 'student';
-            else if (role === 'university') tokenInput.value = 'university';
-            else if (role === 'admin') tokenInput.value = 'admin';
+            if (role === 'student') tokenInput.value = 'STUDENT123';
+            else if (role === 'university') tokenInput.value = 'UNIV2026';
+            else if (role === 'admin') tokenInput.value = 'ADMIN123';
             login();
         }
 
