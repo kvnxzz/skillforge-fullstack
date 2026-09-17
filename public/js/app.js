@@ -1,12 +1,24 @@
 const socket = io();
 
 let currentUser = null;
-const availableJobs = [
-    { id: 1, title: 'Full-Stack Developer Intern', company: 'TechCorp', skillRequired: 'Web Development', matchScore: '🔥 98% Match' },
-    { id: 2, title: 'Data Scientist Associate', company: 'DataGlobe', skillRequired: 'Data Science', matchScore: '⚡ 95% Match' },
-    { id: 3, title: 'Cloud DevOps Architect', company: 'SkyNet Systems', skillRequired: 'DevOps', matchScore: '🚀 91% Match' },
-    { id: 4, title: 'UI/UX Interactive Designer', company: 'DesignHub', skillRequired: 'UI/UX', matchScore: '✨ 89% Match' }
-];
+let availableJobs = [];
+
+// --- Fetch Jobs Dynamically from MongoDB ---
+async function fetchJobs() {
+    try {
+        const res = await fetch('/api/jobs');
+        const data = await res.json();
+        if (data.success) {
+            availableJobs = data.jobs.map(job => ({
+                ...job,
+                matchScore: job.matchScore || '⚡ 95% Match'
+            }));
+            if (currentUser) renderDashboard();
+        }
+    } catch (err) {
+        console.error('Failed to fetch job collection:', err);
+    }
+}
 
 async function login() {
     const token = document.getElementById('auth-token').value;
@@ -33,6 +45,7 @@ async function login() {
                 document.getElementById('dashboard-screen').classList.remove('hidden');
                 document.getElementById('user-greeting').innerText = `Welcome, ${data.name}`;
 
+                await fetchJobs(); // Load database jobs after successful login
                 renderDashboard();
                 socket.emit('user_login', { name: data.name, role: data.role });
             }
@@ -90,23 +103,49 @@ function renderDashboard() {
     }
 }
 
-function addSkill() {
+// --- Persist Added Skill to MongoDB ---
+async function addSkill() {
     const input = document.getElementById('new-skill-input');
     const newSkill = input.value.trim();
+    
     if (newSkill && currentUser) {
         if (!currentUser.needs.includes(newSkill)) {
-            currentUser.needs.push(newSkill);
-            renderDashboard();
+            const updatedNeeds = [...currentUser.needs, newSkill];
+
+            try {
+                const res = await fetch('/api/user/skills', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: currentUser.token, needs: updatedNeeds })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    currentUser.needs = data.needs;
+                    renderDashboard();
+                }
+            } catch (err) {
+                console.error('Failed to persist updated skill:', err);
+            }
         }
         input.value = '';
     }
 }
 
-// Real-time Socket Listener
+// --- Real-time Socket Listeners ---
 socket.on('server_broadcast', (msg) => {
     const alertBox = document.getElementById('broadcast-alert');
     if (alertBox) {
         alertBox.innerText = `📢 LIVE SYSTEM BROADCAST: ${msg}`;
         alertBox.classList.remove('hidden');
     }
+});
+
+// Live update when a university posts a new job
+socket.on('new_job_posted', (newJob) => {
+    availableJobs.unshift({
+        ...newJob,
+        matchScore: '🔥 New Listing'
+    });
+    if (currentUser) renderDashboard();
 });
