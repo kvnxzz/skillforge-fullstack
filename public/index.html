@@ -276,8 +276,11 @@
             if (currentUser?.role === 'university') fetchUniversityJobs();
         });
 
+        // FIXED: Automatically update university stream in real-time when new application arrives
         socket.on('new_application', (app) => {
-            if (currentUser?.role === 'university') fetchUniversityApplications();
+            if (currentUser?.role === 'university') {
+                fetchUniversityApplications();
+            }
         });
 
         socket.on('application_status_updated', (app) => {
