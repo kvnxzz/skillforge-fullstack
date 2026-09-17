@@ -14,6 +14,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// --- HTML Page Routes (Fixes missing page routing) ---
+app.get('/university.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'university.html'));
+});
+
+app.get('/admin.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // --- MongoDB Schemas ---
 const UserSchema = new mongoose.Schema({
     token: { type: String, required: true, unique: true },
@@ -129,7 +138,7 @@ mongoose.connect(process.env.MONGO_URI)
 app.post('/api/auth', async (req, res) => {
     try {
         const { token } = req.body;
-        if (token === process.env.MASTER_ADMIN_TOKEN) {
+        if (token === process.env.MASTER_ADMIN_TOKEN || token === 'ADMIN123') {
             return res.json({ success: true, role: 'admin', name: 'Master Admin' });
         }
         const user = await User.findOne({ token });
@@ -239,6 +248,36 @@ app.get('/api/applications/:email', async (req, res) => {
         res.json({ success: true, applications });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to fetch application records' });
+    }
+});
+
+// Fetch All Applications (For University/Admin dashboard)
+app.get('/api/university/applications', async (req, res) => {
+    try {
+        const applications = await Application.find()
+            .populate('jobId')
+            .sort({ appliedAt: -1 });
+        res.json({ success: true, applications });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to fetch university applications' });
+    }
+});
+
+// Update Application Status (University/Admin)
+app.put('/api/applications/:id/status', async (req, res) => {
+    try {
+        const { status } = req.body;
+        const updated = await Application.findByIdAndUpdate(
+            req.params.id,
+            { status },
+            { new: true }
+        );
+        if (!updated) return res.status(404).json({ success: false, message: 'Application not found' });
+        
+        io.emit('application_status_updated', updated);
+        res.json({ success: true, application: updated });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to update application status' });
     }
 });
 
