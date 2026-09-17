@@ -258,8 +258,8 @@ app.get('/api/applications/:email', async (req, res) => {
     }
 });
 
-// Fetch All Applications (University/Admin Dashboard)
-app.get('/api/university/applications', async (req, res) => {
+// Fetch All Applications (University / Admin Dashboard Endpoints Aliased for Zero Errors)
+const fetchAllApplicationsHandler = async (req, res) => {
     try {
         const applications = await Application.find()
             .populate('jobId')
@@ -268,7 +268,10 @@ app.get('/api/university/applications', async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to fetch applications' });
     }
-});
+};
+
+app.get('/api/applications/all', fetchAllApplicationsHandler);
+app.get('/api/university/applications', fetchAllApplicationsHandler);
 
 // Update Application Status
 app.put('/api/applications/:id/status', async (req, res) => {
