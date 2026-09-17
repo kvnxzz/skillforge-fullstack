@@ -83,7 +83,7 @@ mongoose.connect(MONGO_URI).then(async () => {
     if (!await Settings.findOne({ id: 'global' })) {
         await Settings.create({ id: 'global', portalName: 'SkillForge Live Core', maintenanceMode: false });
     }
-});
+}).catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // --- REST Endpoints ---
 app.post('/api/auth', async (req, res) => {
@@ -96,7 +96,10 @@ app.post('/api/auth', async (req, res) => {
         const user = await User.findOne({ token });
         if (user) return res.json({ success: true, role: user.role, name: user.name, data: user });
         res.status(401).json({ success: false, message: 'Invalid Access Token Matrix' });
-    } catch (e) { res.status(500).json({ success: false, message: 'Server error' }); }
+    } catch (e) { 
+        console.error('Auth error:', e);
+        res.status(500).json({ success: false, message: 'Server error' }); 
+    }
 });
 
 app.put('/api/user/skills', async (req, res) => {
@@ -105,14 +108,20 @@ app.put('/api/user/skills', async (req, res) => {
         const updated = await User.findOneAndUpdate({ token }, { needs }, { new: true });
         if (!updated) return res.status(404).json({ success: false, message: 'User node not found' });
         res.json({ success: true, needs: updated.needs });
-    } catch (e) { res.status(500).json({ success: false }); }
+    } catch (e) { 
+        console.error('Skills update error:', e);
+        res.status(500).json({ success: false }); 
+    }
 });
 
 app.get('/api/jobs', async (req, res) => {
     try {
         const jobs = await Job.find().sort({ createdAt: -1 });
         res.json({ success: true, jobs });
-    } catch (e) { res.status(500).json({ success: false }); }
+    } catch (e) { 
+        console.error('Fetch jobs error:', e);
+        res.status(500).json({ success: false }); 
+    }
 });
 
 app.post('/api/jobs', async (req, res) => {
@@ -121,7 +130,10 @@ app.post('/api/jobs', async (req, res) => {
         const newJob = await Job.create({ title, company, skillRequired });
         io.emit('new_job_posted', newJob);
         res.json({ success: true, job: newJob });
-    } catch (e) { res.status(500).json({ success: false }); }
+    } catch (e) { 
+        console.error('Post job error:', e);
+        res.status(500).json({ success: false }); 
+    }
 });
 
 app.delete('/api/jobs/:id', async (req, res) => {
@@ -129,37 +141,59 @@ app.delete('/api/jobs/:id', async (req, res) => {
         await Job.findByIdAndDelete(req.params.id);
         io.emit('job_deleted', req.params.id);
         res.json({ success: true });
-    } catch (e) { res.status(500).json({ success: false }); }
+    } catch (e) { 
+        console.error('Delete job error:', e);
+        res.status(500).json({ success: false }); 
+    }
 });
 
 app.post('/api/applications', async (req, res) => {
     try {
-        const { jobId, studentName, studentEmail, studentSkills } = req.body;
+        const { jobId, studentName, studentEmail, studentSkills, matchScore } = req.body;
         const job = await Job.findById(jobId);
         if (!job) return res.status(404).json({ success: false, message: 'Job not found' });
 
-        const matchScore = calculateMatch(studentSkills, job.skillRequired);
-        const application = await Application.create({ jobId, studentName, studentEmail, skills: studentSkills, matchScore });
+        const computedMatch = matchScore !== undefined ? matchScore : calculateMatch(studentSkills, job.skillRequired);
+        
+        const application = await Application.create({ 
+            jobId, 
+            studentName, 
+            studentEmail, 
+            skills: studentSkills, 
+            matchScore: computedMatch 
+        });
+        
         const populatedApp = await Application.findById(application._id).populate('jobId');
 
         io.emit('new_application', populatedApp);
         res.json({ success: true, application: populatedApp });
-    } catch (e) { res.status(500).json({ success: false, message: 'Application dispatch failed' }); }
+    } catch (e) { 
+        console.error('Application dispatch error:', e);
+        res.status(500).json({ success: false, message: 'Application dispatch failed' }); 
+    }
 });
 
 app.get('/api/applications/:email', async (req, res) => {
     try {
         const applications = await Application.find({ studentEmail: req.params.email }).populate('jobId').sort({ appliedAt: -1 });
         res.json({ success: true, applications });
-    } catch (e) { res.status(500).json({ success: false }); }
+    } catch (e) { 
+        console.error('Fetch student applications error:', e);
+        res.status(500).json({ success: false }); 
+    }
 });
 
+// Dedicated robust handler for fetching all applications
 const fetchAllApps = async (req, res) => {
     try {
         const applications = await Application.find().populate('jobId').sort({ appliedAt: -1 });
         res.json({ success: true, applications });
-    } catch (e) { res.status(500).json({ success: false }); }
+    } catch (e) { 
+        console.error('Fetch all applications error:', e);
+        res.status(500).json({ success: false, message: e.message }); 
+    }
 };
+
 app.get('/api/applications/all', fetchAllApps);
 app.get('/api/university/applications', fetchAllApps);
 
@@ -169,13 +203,26 @@ app.put('/api/applications/:id/status', async (req, res) => {
         const updated = await Application.findByIdAndUpdate(req.params.id, { status }, { new: true }).populate('jobId');
         io.emit('application_status_updated', updated);
         res.json({ success: true, application: updated });
-    } catch (e) { res.status(500).json({ success: false }); }
+    } catch (e) { 
+        console.error('Update application status error:', e);
+        res.status(500).json({ success: false }); 
+    }
 });
 
 app.get('/api/admin/stats', async (req, res) => {
     try {
-        res.json({ success: true, stats: { totalJobs: await Job.countDocuments(), totalApps: await Application.countDocuments(), totalUsers: await User.countDocuments() } });
-    } catch (e) { res.status(500).json({ success: false }); }
+        res.json({ 
+            success: true, 
+            stats: { 
+                totalJobs: await Job.countDocuments(), 
+                totalApps: await Application.countDocuments(), 
+                totalUsers: await User.countDocuments() 
+            } 
+        });
+    } catch (e) { 
+        console.error('Admin stats error:', e);
+        res.status(500).json({ success: false }); 
+    }
 });
 
 // --- Socket Management ---
